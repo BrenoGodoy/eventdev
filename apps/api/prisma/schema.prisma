@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ORGANIZER
+  CUSTOMER
+  GATE
+}
+
+enum EventMode {
+  ONLINE
+  IN_PERSON
+  HYBRID
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELED
+  FINISHED
+}
+
+enum EventSeatStatus {
+  AVAILABLE
+  HELD
+  RESERVED
+  BLOCKED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum TicketStatus {
+  ACTIVE
+  USED
+  CANCELED
+  TRANSFERRED
+}
+
+enum GateCheckResult {
+  ALLOWED
+  DENIED
+  DUPLICATE
+  INVALID
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  passwordHash    String
+  role            UserRole      @default(CUSTOMER)
+  organizedEvents Event[]       @relation("EventOrganizer")
+  reservations    Reservation[]
+  gateChecks      GateCheck[]   @relation("GateUserChecks")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Event {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  catalogSnapshot Json
+  date            DateTime
+  venue           String
+  mode            EventMode
+  price           Decimal       @db.Decimal(10, 2)
+  status          EventStatus   @default(DRAFT)
+  organizerId     String
+  organizer       User          @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Restrict)
+  seats           EventSeat[]
+  reservations    Reservation[]
+  tickets         Ticket[]
+  gateChecks      GateCheck[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([organizerId])
+}
+
+model EventSeat {
+  id            String          @id @default(cuid())
+  eventId       String
+  row           String
+  number        Int
+  status        EventSeatStatus @default(AVAILABLE)
+  holdExpiresAt DateTime?
+  reservationId String?
+  event         Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reservation   Reservation?    @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  ticket        Ticket?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([eventId, row, number])
+  @@index([reservationId])
+}
+
+model Reservation {
+  id            String            @id @default(cuid())
+  userId        String
+  eventId       String
+  status        ReservationStatus @default(PENDING)
+  expiresAt     DateTime?
+  quantity      Int
+  total         Decimal           @db.Decimal(10, 2)
+  paymentStatus PaymentStatus     @default(PENDING)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  event         Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  seats         EventSeat[]
+  tickets       Ticket[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([eventId])
+}
+
+model Ticket {
+  id            String       @id @default(cuid())
+  reservationId String
+  eventId       String
+  seatId        String?      @unique
+  publicCode    String       @unique
+  signature     String
+  nonce         String       @unique
+  usedAt        DateTime?
+  status        TicketStatus @default(ACTIVE)
+  reservation   Reservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  seat          EventSeat?   @relation(fields: [seatId], references: [id], onDelete: SetNull)
+  gateChecks    GateCheck[]
+  shareTokens   ShareToken[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([reservationId])
+  @@index([eventId])
+}
+
+model GateCheck {
+  id         String          @id @default(cuid())
+  ticketId   String
+  eventId    String
+  gateUserId String
+  result     GateCheckResult
+  createdAt  DateTime        @default(now())
+  ticket     Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  event      Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  gateUser   User            @relation("GateUserChecks", fields: [gateUserId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId])
+  @@index([eventId])
+  @@index([gateUserId])
+}
+
+model ShareToken {
+  id        String    @id @default(cuid())
+  ticketId  String
+  tokenHash String    @unique
+  revokedAt DateTime?
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  ticket    Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}

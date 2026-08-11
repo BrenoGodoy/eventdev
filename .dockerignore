@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log*
+dist
+build
+.next
+coverage
+.git
+.env
+.env.*
+!.env.example
+!.env.local.example
+.DS_Store
