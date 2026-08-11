@@ -1,0 +1,29 @@
+{
+  "name": "eventdev",
+  "version": "1.0.0",
+  "description": "EventDev é uma plataforma completa de gerenciamento de eventos e venda de ingressos desenvolvida como solução para o Desafio Elite Dev 2026 da Verzel.",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=web",
+    "dev:api": "npm run start:dev --workspace=api",
+    "build:web": "npm run build --workspace=web",
+    "build:api": "npm run build --workspace=api"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrenoGodoy/eventdev.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BrenoGodoy/eventdev/issues"
+  },
+  "homepage": "https://github.com/BrenoGodoy/eventdev#readme"
+}
