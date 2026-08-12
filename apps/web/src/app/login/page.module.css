@@ -1,0 +1,265 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: minmax(0, 1fr) minmax(26rem, 0.72fr);
+  background: var(--color-paper);
+}
+
+.story {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4rem;
+  overflow: hidden;
+  padding: clamp(2rem, 4vw, 3.5rem);
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.storyCopy {
+  max-width: 46rem;
+}
+
+.eyebrow {
+  margin-bottom: 0.75rem;
+  color: var(--color-acid);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.storyCopy h1 {
+  max-width: 44rem;
+  font-family: var(--font-display);
+  font-size: 5.75rem;
+  line-height: 0.94;
+}
+
+.storyCopy p:last-child {
+  max-width: 38rem;
+  margin-top: 1.5rem;
+  color: var(--color-text-soft);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.ticket {
+  display: grid;
+  min-height: 11rem;
+  grid-template-columns: minmax(10.5rem, 0.35fr) minmax(0, 1fr);
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: var(--radius-md);
+  background: #171e35;
+}
+
+.ticketDate {
+  display: grid;
+  place-content: center;
+  border-right: 1px dashed rgb(11 16 32 / 35%);
+  background: var(--color-acid);
+  color: var(--color-ink);
+  text-align: center;
+}
+
+.ticketDate span {
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ticketDate strong {
+  font-family: var(--font-display);
+  font-size: 3.6rem;
+  line-height: 1;
+}
+
+.ticketRoute {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.ticketRoute span {
+  display: grid;
+  place-items: center;
+  border-left: 1px solid rgb(255 255 255 / 10%);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.ticketRoute span:first-child {
+  border-left: 0;
+  background: #273451;
+}
+
+.ticketRoute span:nth-child(2) {
+  background: #463f92;
+}
+
+.ticketRoute span:nth-child(3) {
+  background: #244e43;
+}
+
+.panel {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: clamp(2rem, 5vw, 4.5rem);
+}
+
+.panelInner {
+  width: min(100%, 32rem);
+}
+
+.panelEyebrow {
+  margin-bottom: 0.75rem;
+  color: var(--color-violet);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.panelHeading h2 {
+  font-family: var(--font-display);
+  font-size: 3.25rem;
+  line-height: 1;
+}
+
+.panelHeading p:last-child {
+  margin-top: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.accountGrid {
+  display: grid;
+  gap: 0.625rem;
+  margin: 2rem 0;
+}
+
+.accountCard {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-align: left;
+}
+
+.accountCard span {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.accountCard strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+}
+
+.accountCard:hover,
+.accountCardActive {
+  border-color: var(--color-violet);
+}
+
+.accountCardActive {
+  box-shadow: var(--shadow-focus);
+}
+
+.form {
+  display: grid;
+  gap: 1.125rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+  color: var(--color-ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.field input {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: 0.85rem 0.95rem;
+}
+
+.field input:focus {
+  border-color: var(--color-violet);
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.error {
+  border-left: 4px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  padding: 0.75rem 0.875rem;
+  font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .story,
+  .panel {
+    min-height: auto;
+  }
+
+  .story {
+    gap: 3rem;
+  }
+
+  .storyCopy h1 {
+    font-size: 4.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .story,
+  .panel {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .ticket {
+    min-height: 15rem;
+    grid-template-columns: 1fr;
+  }
+
+  .ticketDate {
+    border-right: 0;
+    border-bottom: 1px dashed rgb(11 16 32 / 35%);
+    padding: 1.25rem;
+  }
+
+  .ticketDate strong {
+    font-size: 2.8rem;
+  }
+
+  .storyCopy h1 {
+    font-size: 3.25rem;
+  }
+
+  .panelHeading h2 {
+    font-size: 2.5rem;
+  }
+
+  .accountCard {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}

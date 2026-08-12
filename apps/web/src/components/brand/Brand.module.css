@@ -1,0 +1,37 @@
+.brand {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-ink);
+  font-weight: 800;
+}
+
+.inverse {
+  color: var(--color-surface);
+}
+
+.mark {
+  display: inline-grid;
+  width: 2.625rem;
+  height: 2.625rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 2px solid currentColor;
+  border-radius: var(--radius-md);
+  background: var(--color-acid);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.name {
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .name {
+    font-size: 0.9rem;
+  }
+}

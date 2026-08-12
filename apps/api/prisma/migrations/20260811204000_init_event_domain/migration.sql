@@ -216,9 +216,9 @@ ALTER TABLE "ShareToken" ADD CONSTRAINT "ShareToken_ticketId_fkey" FOREIGN KEY (
 -- SeedData
 INSERT INTO "User" ("id", "email", "passwordHash", "role", "createdAt", "updatedAt")
 VALUES
-  ('usr_organizer_001', 'organizer@eventdev.local', '$2b$10$eventdev.organizer.hash', 'ORGANIZER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('usr_customer_001', 'cliente@eventdev.local', '$2b$10$eventdev.customer.hash', 'CUSTOMER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('usr_gate_001', 'portaria@eventdev.local', '$2b$10$eventdev.gate.hash', 'GATE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('usr_organizer_001', 'organizer@elite.dev', '$2b$10$eventdev.organizer.hash', 'ORGANIZER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('usr_customer_001', 'cliente1@elite.dev', '$2b$10$eventdev.customer.hash', 'CUSTOMER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('usr_gate_001', 'portaria@elite.dev', '$2b$10$eventdev.gate.hash', 'GATE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO "Event" ("id", "slug", "catalogSnapshot", "date", "venue", "mode", "price", "status", "organizerId", "createdAt", "updatedAt")
 VALUES (
