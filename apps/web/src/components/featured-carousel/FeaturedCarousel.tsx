@@ -112,8 +112,29 @@ function getPositionClass(offset: number) {
   return styles.farRight;
 }
 
-export function FeaturedCarousel() {
-  const [activeIndex, setActiveIndex] = useState(0);
+type FeaturedCarouselProps = {
+  query?: string;
+};
+
+export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
+  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
+  const initialMatchIndex = normalizedQuery
+    ? featuredEvents.findIndex((event) =>
+        [
+          event.category,
+          event.title,
+          event.venue,
+          event.city,
+          event.date,
+        ]
+          .join(" ")
+          .toLocaleLowerCase("pt-BR")
+          .includes(normalizedQuery),
+      )
+    : -1;
+  const [activeIndex, setActiveIndex] = useState(
+    initialMatchIndex >= 0 ? initialMatchIndex : 0,
+  );
   const [isPaused, setIsPaused] = useState(false);
   const pointerStartX = useRef<number | null>(null);
 
@@ -208,7 +229,13 @@ export function FeaturedCarousel() {
           <p className={styles.eyebrow}>Selecao Elite</p>
           <h2 id="featured-title">Eventos em destaque</h2>
         </div>
-        <p>{featuredEvents.length} experiencias escolhidas para voce</p>
+        <p>
+          {query && initialMatchIndex < 0
+            ? `Nenhum resultado para "${query}". Veja nossa selecao.`
+            : query
+              ? `Resultado em destaque para "${query}"`
+              : `${featuredEvents.length} experiencias escolhidas para voce`}
+        </p>
       </div>
 
       <div

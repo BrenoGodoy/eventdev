@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ArrowRight, CalendarDays, LogOut, Search } from "lucide-react";
 import { Brand } from "../components/brand/Brand";
 import { FeaturedCarousel } from "../components/featured-carousel/FeaturedCarousel";
 import actions from "../components/ui/Action.module.css";
@@ -32,9 +34,26 @@ const roleHome = {
   },
 };
 
+const roleNavigation = {
+  ORGANIZER: {
+    label: "Ir para o painel do organizador",
+    profileImage: "/profiles/organizer.png",
+  },
+  CUSTOMER: {
+    label: "Ir para o painel do cliente",
+    profileImage: "/profiles/customer.png",
+  },
+  GATE: {
+    label: "Ir para o painel da portaria",
+    profileImage: "/profiles/gate.png",
+  },
+};
+
 export default function HomePage() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [eventFilter, setEventFilter] = useState("");
 
   useEffect(() => {
     const hydrationId = window.setTimeout(() => {
@@ -58,20 +77,69 @@ export default function HomePage() {
     setSession(null);
   }
 
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setEventFilter(searchValue.trim());
+
+    window.requestAnimationFrame(() => {
+      document.getElementById("eventos")?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  const navigationContent = session
+    ? roleNavigation[session.user.role]
+    : null;
+
   return (
     <main className={styles.page}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Brand />
+          <form
+            className={styles.searchForm}
+            onSubmit={handleSearch}
+            role="search"
+          >
+            <Search aria-hidden="true" size={20} strokeWidth={2.2} />
+            <input
+              aria-label="Filtrar eventos"
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder="Busque por evento, categoria ou cidade"
+              type="search"
+              value={searchValue}
+            />
+            <button aria-label="Buscar" type="submit">
+              <span>Buscar</span>
+              <ArrowRight
+                aria-hidden="true"
+                className={styles.searchArrow}
+                size={19}
+              />
+            </button>
+          </form>
           <nav className={styles.nav} aria-label="Navegacao principal">
+            <Link className={styles.eventsLink} href="#eventos">
+              <CalendarDays aria-hidden="true" size={19} />
+              Eventos
+            </Link>
             {session ? (
               <>
-                <span className={styles.sessionName}>{session.user.name}</span>
+                <Link className={styles.profile} href="#painel">
+                  <Image
+                    alt={`Perfil de ${session.user.name}`}
+                    className={styles.profileImage}
+                    height={40}
+                    src={navigationContent?.profileImage ?? "/profiles/customer.png"}
+                    width={40}
+                  />
+                  <span className={styles.sessionName}>{session.user.name}</span>
+                </Link>
                 <button
-                  className={`${actions.action} ${actions.ghost}`}
+                  className={styles.logoutButton}
                   onClick={handleLogout}
                   type="button"
                 >
+                  <LogOut aria-hidden="true" size={18} />
                   Sair
                 </button>
               </>
@@ -88,36 +156,63 @@ export default function HomePage() {
       </header>
 
       <section className={styles.hero} aria-labelledby="home-title">
+        <div className={styles.heroMedia}>
+          <Image
+            alt="Amigos celebrando em um evento com palco violeta e iluminacao verde acido"
+            className={styles.heroImage}
+            fill
+            priority
+            sizes="(max-width: 900px) 100vw, 48vw"
+            src="/home/elite-experiences.png"
+          />
+          <div className={styles.heroBadge}>
+            <span>Elite selection</span>
+            <strong>ED</strong>
+          </div>
+        </div>
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>MVP Dia 1</p>
+          <p className={styles.eyebrow}>Seu proximo evento comeca aqui</p>
           <h1 id="home-title">
-            Eventos, ingressos e portaria em uma jornada demonstravel.
+            Eventos para <span className={styles.violetWord}>viver</span>,
+            historias para <span className={styles.acidWord}>lembrar</span>.
           </h1>
           <p>
-            A base do desafio com tres papeis, catalogo publico e direcao visual
-            pronta para crescer para reserva, pagamento e scanner.
+            Descubra shows, festivais, cinema e experiencias que aproximam
+            pessoas. Da escolha do evento ate a entrada, tudo em uma so jornada.
           </p>
           <div className={styles.heroActions}>
             <Link
               className={`${actions.action} ${actions.primary}`}
-              href="/login"
-            >
-              {session ? "Trocar papel" : "Entrar com conta demo"}
-            </Link>
-            <Link
-              className={`${actions.action} ${actions.secondary}`}
               href="#eventos"
             >
-              Ver eventos
+              Eventos em destaque
             </Link>
+            {session && navigationContent ? (
+              <Link
+                className={`${actions.action} ${actions.secondary}`}
+                href="#painel"
+              >
+                {navigationContent.label}
+              </Link>
+            ) : (
+              <Link
+                className={`${actions.action} ${actions.secondary}`}
+                href="/login"
+              >
+                Entrar
+              </Link>
+            )}
           </div>
         </div>
-
       </section>
 
-      <FeaturedCarousel />
+      <FeaturedCarousel key={eventFilter} query={eventFilter} />
 
-      <section className={styles.roleSection} aria-live="polite">
+      <section
+        className={styles.roleSection}
+        id="painel"
+        aria-live="polite"
+      >
         <div className={styles.roleInner}>
           {isReady && roleContent ? (
             <>
