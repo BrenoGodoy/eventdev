@@ -153,12 +153,20 @@ export function FeaturedCarousel() {
   }
 
   function handlePointerDown(event: PointerEvent<HTMLElement>) {
+    if (event.target instanceof Element && event.target.closest("button")) {
+      return;
+    }
+
     pointerStartX.current = event.clientX;
     event.currentTarget.setPointerCapture(event.pointerId);
     setIsPaused(true);
   }
 
   function handlePointerUp(event: PointerEvent<HTMLElement>) {
+    if (event.target instanceof Element && event.target.closest("button")) {
+      return;
+    }
+
     if (pointerStartX.current === null) return;
 
     const distance = event.clientX - pointerStartX.current;
@@ -257,7 +265,12 @@ export function FeaturedCarousel() {
 
         <button
           className={`${styles.arrow} ${styles.previous}`}
-          onClick={showPrevious}
+          onClick={() => {
+            setIsPaused(true);
+            showPrevious();
+          }}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
           title="Evento anterior"
           type="button"
           aria-label="Mostrar evento anterior"
@@ -266,7 +279,12 @@ export function FeaturedCarousel() {
         </button>
         <button
           className={`${styles.arrow} ${styles.next}`}
-          onClick={showNext}
+          onClick={() => {
+            setIsPaused(true);
+            showNext();
+          }}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
           title="Proximo evento"
           type="button"
           aria-label="Mostrar proximo evento"
