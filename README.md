@@ -94,3 +94,25 @@ Rotas do cliente:
 
 - `/eventos/:slug/checkout`: selecao, reserva e pagamento simulado.
 - `/meus-ingressos`: carteira com os QRs assinados do cliente autenticado.
+
+## Portaria
+
+O perfil de portaria acessa `/portaria`, seleciona o evento em operacao e pode
+ler o QR pela camera ou digitar o codigo publico do ingresso. O backend valida a
+assinatura HMAC do QR, compara o evento e consome o ingresso em uma transacao
+condicional. Duas leituras concorrentes nunca autorizam duas entradas.
+
+Os retornos operacionais sao **Ingresso valido**, **Ingresso invalido**, **Ja
+utilizado** e **Evento errado**. Todas as tentativas ficam registradas em
+`GateCheck`; entradas desconhecidas armazenam somente o hash SHA-256 do valor
+lido, sem persistir o conteudo bruto do QR.
+
+O acesso a camera exige `localhost` durante o desenvolvimento ou HTTPS no
+ambiente publicado. Se a permissao for negada ou nao houver camera, o codigo
+manual continua disponivel.
+
+Rotas protegidas da portaria:
+
+- `GET /api/gate/events`: eventos disponiveis e contagem de entradas.
+- `POST /api/gate/validate`: valida QR ou codigo publico e registra a tentativa.
+- `GET /api/gate/checks`: ultimas leituras do operador autenticado.

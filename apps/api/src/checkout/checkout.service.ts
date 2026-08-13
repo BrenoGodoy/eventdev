@@ -8,7 +8,7 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { createHmac, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import {
   EventStatus,
   PaymentStatus,
@@ -18,6 +18,7 @@ import {
 } from '@prisma/client';
 import { AuthUser } from '../auth/auth-user';
 import { PrismaService } from '../prisma/prisma.service';
+import { createTicketQrPayload, signTicketClaims } from '../tickets/ticket-qr';
 import type {
   CreateReservationInput,
   SimulatePaymentInput,
@@ -496,7 +497,13 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
     const id = randomUUID();
     const publicCode = `ED-${randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase()}`;
     const nonce = randomUUID();
-    const signature = this.sign(`${id}.${eventId}.${publicCode}.${nonce}`);
+    const signature = signTicketClaims({
+      version: 1,
+      ticketId: id,
+      eventId,
+      publicCode,
+      nonce,
+    });
 
     return {
       id,
@@ -508,14 +515,6 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
       signature,
       status: TicketStatus.ACTIVE,
     };
-  }
-
-  private sign(payload: string) {
-    const secret =
-      process.env.TICKET_SIGNING_SECRET ??
-      process.env.JWT_SECRET ??
-      'eventdev-local-ticket-signing-secret';
-    return createHmac('sha256', secret).update(payload).digest('base64url');
   }
 
   private holdMinutes() {
@@ -605,14 +604,16 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
       event: { ...ticket.event, date: ticket.event.date.toISOString() },
       tier: ticket.tier,
       reservationId: ticket.reservation.id,
-      qrPayload: JSON.stringify({
-        version: 1,
-        ticketId: ticket.id,
-        eventId: ticket.event.id,
-        publicCode: ticket.publicCode,
-        nonce: ticket.nonce,
-        signature: ticket.signature,
-      }),
+      qrPayload: createTicketQrPayload(
+        {
+          version: 1,
+          ticketId: ticket.id,
+          eventId: ticket.event.id,
+          publicCode: ticket.publicCode,
+          nonce: ticket.nonce,
+        },
+        ticket.signature,
+      ),
     };
   }
 }

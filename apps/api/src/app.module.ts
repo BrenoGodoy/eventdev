@@ -7,10 +7,11 @@ import { AuthGuard } from './auth/auth.guard';
 import { RolesGuard } from './auth/roles.guard';
 import { CheckoutModule } from './checkout/checkout.module';
 import { EventsModule } from './events/events.module';
+import { GateModule } from './gate/gate.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, EventsModule, CheckoutModule],
+  imports: [PrismaModule, AuthModule, EventsModule, CheckoutModule, GateModule],
   controllers: [AppController],
   providers: [
     AppService,

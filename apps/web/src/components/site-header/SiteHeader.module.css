@@ -53,6 +53,34 @@
   box-shadow: var(--shadow-focus);
 }
 
+.gateContext {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.7rem;
+  border-left: 3px solid var(--color-acid);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  padding: 0.55rem 0.9rem;
+}
+
+.gateContext > svg {
+  flex: 0 0 auto;
+  color: var(--color-acid);
+}
+
+.gateContext span {
+  display: grid;
+  gap: 0.1rem;
+  color: var(--color-text-soft);
+  font-size: 0.7rem;
+}
+
+.gateContext strong {
+  color: var(--color-surface);
+  font-size: 0.8rem;
+}
+
 .searchForm button {
   display: inline-flex;
   align-self: stretch;
@@ -130,6 +158,24 @@
   color: var(--color-violet-dark);
 }
 
+.gateLink {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.35rem;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.gateLink svg {
+  color: var(--color-success);
+}
+
+.gateLink:hover {
+  color: var(--color-violet-dark);
+}
+
 .profile {
   display: inline-flex;
   min-width: 0;
@@ -186,6 +232,11 @@
     grid-row: 2;
   }
 
+  .gateContext {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
   .nav {
     justify-self: end;
   }
@@ -206,6 +257,16 @@
     width: 2.75rem;
     justify-content: center;
     padding: 0;
+  }
+
+  .gateLink {
+    width: 2.75rem;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .gateLink span {
+    display: none;
   }
 
   .customerLink span {
@@ -239,6 +300,14 @@
   }
 
   .customerLink {
+    display: none;
+  }
+
+  .gateLink {
+    display: none;
+  }
+
+  .gateContext {
     display: none;
   }
 

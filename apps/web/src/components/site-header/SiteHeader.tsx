@@ -10,7 +10,9 @@ import {
   LayoutGrid,
   LogOut,
   Plus,
+  ScanLine,
   Search,
+  ShieldCheck,
   TicketCheck,
 } from "lucide-react";
 import { AuthSession } from "../../lib/auth";
@@ -32,38 +34,52 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState(initialQuery);
-  const navigationContent = session
-    ? roleNavigation[session.user.role]
-    : null;
+  const navigationContent = session ? roleNavigation[session.user.role] : null;
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = searchValue.trim();
-    router.push(query ? `/eventos?query=${encodeURIComponent(query)}` : "/eventos");
+    router.push(
+      query ? `/eventos?query=${encodeURIComponent(query)}` : "/eventos",
+    );
   }
 
   return (
     <header className={styles.header}>
       <div className={styles.headerInner}>
         <Brand />
-        <form className={styles.searchForm} onSubmit={handleSearch} role="search">
-          <Search aria-hidden="true" size={20} strokeWidth={2.2} />
-          <input
-            aria-label="Buscar eventos"
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Busque por evento, categoria ou cidade"
-            type="search"
-            value={searchValue}
-          />
-          <button aria-label="Buscar" type="submit">
-            <span>Buscar</span>
-            <ArrowRight
-              aria-hidden="true"
-              className={styles.searchArrow}
-              size={19}
+        {session?.user.role === "GATE" ? (
+          <div className={styles.gateContext}>
+            <ShieldCheck aria-hidden="true" size={20} />
+            <span>
+              <strong>Operacao de portaria</strong>
+              Validacao protegida e auditavel
+            </span>
+          </div>
+        ) : (
+          <form
+            className={styles.searchForm}
+            onSubmit={handleSearch}
+            role="search"
+          >
+            <Search aria-hidden="true" size={20} strokeWidth={2.2} />
+            <input
+              aria-label="Buscar eventos"
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder="Busque por evento, categoria ou cidade"
+              type="search"
+              value={searchValue}
             />
-          </button>
-        </form>
+            <button aria-label="Buscar" type="submit">
+              <span>Buscar</span>
+              <ArrowRight
+                aria-hidden="true"
+                className={styles.searchArrow}
+                size={19}
+              />
+            </button>
+          </form>
+        )}
         <nav className={styles.nav} aria-label="Navegacao principal">
           <Link className={styles.eventsLink} href="/eventos">
             <CalendarDays aria-hidden="true" size={19} />
@@ -71,11 +87,17 @@ export function SiteHeader({
           </Link>
           {session?.user.role === "ORGANIZER" && (
             <div className={styles.organizerNav}>
-              <Link className={styles.organizerLink} href="/organizador/eventos/novo">
+              <Link
+                className={styles.organizerLink}
+                href="/organizador/eventos/novo"
+              >
                 <Plus aria-hidden="true" size={19} />
                 <span>Criar evento</span>
               </Link>
-              <Link className={styles.organizerLink} href="/organizador/eventos">
+              <Link
+                className={styles.organizerLink}
+                href="/organizador/eventos"
+              >
                 <LayoutGrid aria-hidden="true" size={19} />
                 <span>Meus eventos</span>
               </Link>
@@ -85,6 +107,12 @@ export function SiteHeader({
             <Link className={styles.customerLink} href="/meus-ingressos">
               <TicketCheck aria-hidden="true" size={19} />
               <span>Meus ingressos</span>
+            </Link>
+          )}
+          {session?.user.role === "GATE" && (
+            <Link className={styles.gateLink} href="/portaria">
+              <ScanLine aria-hidden="true" size={19} />
+              <span>Portaria</span>
             </Link>
           )}
           {session ? (
@@ -97,7 +125,9 @@ export function SiteHeader({
                   alt={`Perfil de ${session.user.name}`}
                   className={styles.profileImage}
                   height={40}
-                  src={navigationContent?.profileImage ?? "/profiles/customer.png"}
+                  src={
+                    navigationContent?.profileImage ?? "/profiles/customer.png"
+                  }
                   width={40}
                 />
                 <span className={styles.sessionName}>{session.user.name}</span>

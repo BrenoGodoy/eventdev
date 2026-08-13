@@ -123,91 +123,11 @@
   line-height: 1.65;
 }
 
-.heroActions,
-.roleActions {
+.heroActions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.75rem;
-}
-
-.roleSection {
-  scroll-margin-top: 5.25rem;
-  background: var(--color-ink);
-  color: var(--color-surface);
-}
-
-.roleInner {
-  display: grid;
-  width: min(100%, var(--content-max-width));
-  min-height: 22rem;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.65fr);
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: center;
-  margin: 0 auto;
-  padding: clamp(3rem, 6vw, 5rem) var(--page-gutter);
-}
-
-.roleCopy {
-  max-width: 48rem;
-}
-
-.roleCopy .eyebrow {
-  color: var(--color-acid);
-}
-
-.roleCopy h2 {
-  font-family: var(--font-display);
-  font-size: 4rem;
-  line-height: 0.98;
-}
-
-.roleCopy > p:last-of-type {
-  max-width: 41rem;
-  margin-top: 1.25rem;
-  color: var(--color-text-soft);
-  line-height: 1.65;
-}
-
-.roleAside {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.roleStats {
-  display: grid;
-  gap: 0.625rem;
-}
-
-.roleStats span {
-  border-left: 3px solid var(--color-acid);
-  background: rgb(255 255 255 / 7%);
-  padding: 0.85rem 1rem;
-  font-weight: 800;
-}
-
-.roleSection .roleActions {
-  margin-top: 0;
-}
-
-.primaryOnDark {
-  background: var(--color-acid);
-  color: var(--color-ink);
-}
-
-.primaryOnDark:hover:not(:disabled) {
-  background: var(--color-acid);
-}
-
-.secondaryOnDark {
-  border-color: rgb(255 255 255 / 28%);
-  background: transparent;
-  color: var(--color-surface);
-}
-
-.secondaryOnDark:hover:not(:disabled) {
-  border-color: var(--color-acid);
-  color: var(--color-acid);
 }
 
 @media (max-width: 1280px) {
@@ -231,10 +151,6 @@
     font-size: 3.75rem;
   }
 
-  .roleInner {
-    min-height: auto;
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 700px) {
@@ -278,17 +194,10 @@
     margin-top: 1.35rem;
   }
 
-  .roleCopy h2 {
-    font-size: 3rem;
-  }
 }
 
 @media (max-width: 380px) {
   .heroCopy h1 {
-    font-size: 2.6rem;
-  }
-
-  .roleCopy h2 {
     font-size: 2.6rem;
   }
 }

@@ -83,37 +83,37 @@ model User {
 }
 
 model Event {
-  id              String        @id @default(cuid())
-  slug            String        @unique
-  title           String
+  id                String            @id @default(cuid())
+  slug              String            @unique
+  title             String
   /// Markdown content rendered on the public event page.
-  description     String
-  category        String
-  catalogSnapshot Json
-  date            DateTime
-  venue           String
-  city            String
-  state           String        @db.Char(2)
-  imageUrl        String
-  imageAlt        String
-  catalogProvider CatalogProvider?
+  description       String
+  category          String
+  catalogSnapshot   Json
+  date              DateTime
+  venue             String
+  city              String
+  state             String            @db.Char(2)
+  imageUrl          String
+  imageAlt          String
+  catalogProvider   CatalogProvider?
   catalogExternalId String?
-  mode            EventMode
-  price           Decimal       @db.Decimal(10, 2)
-  capacity        Int
+  mode              EventMode
+  price             Decimal           @db.Decimal(10, 2)
+  capacity          Int
   availableQuantity Int
-  featured        Boolean       @default(false)
-  featuredOrder   Int?
-  status          EventStatus   @default(DRAFT)
-  organizerId     String
-  organizer       User          @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Restrict)
-  ticketTiers     EventTicketTier[]
-  seats           EventSeat[]
-  reservations    Reservation[]
-  tickets         Ticket[]
-  gateChecks      GateCheck[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  featured          Boolean           @default(false)
+  featuredOrder     Int?
+  status            EventStatus       @default(DRAFT)
+  organizerId       String
+  organizer         User              @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Restrict)
+  ticketTiers       EventTicketTier[]
+  seats             EventSeat[]
+  reservations      Reservation[]
+  tickets           Ticket[]
+  gateChecks        GateCheck[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([organizerId])
   @@index([status, date])
@@ -123,20 +123,20 @@ model Event {
 }
 
 model EventTicketTier {
-  id                String          @id @default(cuid())
+  id                String            @id @default(cuid())
   eventId           String
   type              TicketTierType
   name              String
   description       String
-  price             Decimal         @db.Decimal(10, 2)
+  price             Decimal           @db.Decimal(10, 2)
   capacity          Int
   availableQuantity Int
-  active            Boolean         @default(true)
-  event              Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  reservationItems   ReservationItem[]
-  tickets            Ticket[]
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  active            Boolean           @default(true)
+  event             Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reservationItems  ReservationItem[]
+  tickets           Ticket[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@unique([eventId, type])
   @@index([eventId, active])
@@ -198,24 +198,24 @@ model ReservationItem {
 }
 
 model Ticket {
-  id            String       @id @default(cuid())
+  id            String           @id @default(cuid())
   reservationId String
   eventId       String
   tierId        String?
-  seatId        String?      @unique
-  publicCode    String       @unique
+  seatId        String?          @unique
+  publicCode    String           @unique
   signature     String
-  nonce         String       @unique
+  nonce         String           @unique
   usedAt        DateTime?
-  status        TicketStatus @default(ACTIVE)
-  reservation   Reservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  status        TicketStatus     @default(ACTIVE)
+  reservation   Reservation      @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  event         Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   tier          EventTicketTier? @relation(fields: [tierId], references: [id], onDelete: Restrict)
-  seat          EventSeat?   @relation(fields: [seatId], references: [id], onDelete: SetNull)
+  seat          EventSeat?       @relation(fields: [seatId], references: [id], onDelete: SetNull)
   gateChecks    GateCheck[]
   shareTokens   ShareToken[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([reservationId])
   @@index([eventId])
@@ -224,18 +224,20 @@ model Ticket {
 
 model GateCheck {
   id         String          @id @default(cuid())
-  ticketId   String
+  ticketId   String?
   eventId    String
   gateUserId String
   result     GateCheckResult
+  codeHash   String?         @db.Char(64)
   createdAt  DateTime        @default(now())
-  ticket     Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticket     Ticket?         @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   event      Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
   gateUser   User            @relation("GateUserChecks", fields: [gateUserId], references: [id], onDelete: Restrict)
 
   @@index([ticketId])
   @@index([eventId])
   @@index([gateUserId])
+  @@index([eventId, createdAt])
 }
 
 model ShareToken {

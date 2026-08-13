@@ -17,6 +17,6 @@ export const roleNavigation: Record<
   GATE: {
     label: "Ir para o painel da portaria",
     profileImage: "/profiles/gate.png",
-    href: "/#painel",
+    href: "/portaria",
   },
 };
