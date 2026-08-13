@@ -143,6 +143,7 @@
 
 .buyButton {
   justify-content: center;
+  border-radius: var(--radius-md);
   gap: 0.65rem;
   background: var(--color-violet);
   color: var(--color-surface);
