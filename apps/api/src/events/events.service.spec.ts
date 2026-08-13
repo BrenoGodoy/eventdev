@@ -1,21 +1,40 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { CatalogService } from '../catalog/catalog.service';
 import { EventsService } from './events.service';
 
 describe('EventsService', () => {
   const findMany = jest.fn();
   const findFirst = jest.fn();
+  const create = jest.fn();
   const prisma = {
-    event: { findFirst, findMany },
+    event: { create, findFirst, findMany },
   } as unknown as PrismaService;
-  const service = new EventsService(prisma);
+  const findAttraction = jest.fn();
+  const catalogService = { findAttraction } as unknown as CatalogService;
+  const service = new EventsService(prisma, catalogService);
 
   beforeEach(() => {
     findMany.mockReset();
     findMany.mockResolvedValue([]);
     findFirst.mockReset();
     findFirst.mockResolvedValue(null);
+    create.mockReset();
+    findAttraction.mockReset();
+    findAttraction.mockResolvedValue({
+      provider: 'TICKETMASTER',
+      externalId: 'demo-coldplay',
+      name: 'Coldplay',
+      imageUrl: '/events/aurora-live.png',
+      imageAlt: 'Imagem de Coldplay',
+      category: 'Musica',
+      genre: 'Rock',
+      subGenre: 'Alternative Rock',
+      sourceUrl: null,
+      locale: 'en-us',
+      upcomingEvents: 10,
+    });
   });
 
   it('filters published events by Brazilian state and maximum price', async () => {
@@ -82,10 +101,27 @@ describe('EventsService', () => {
       state: 'SP',
       imageUrl: '/events/aurora-live.png',
       imageAlt: 'Palco do evento Aurora Live Sessions',
+      catalogProvider: null,
+      catalogExternalId: null,
       mode: 'IN_PERSON',
       price: { toString: () => '129' },
+      capacity: 500,
+      availableQuantity: 500,
       featured: true,
       featuredOrder: 2,
+      status: 'PUBLISHED',
+      createdAt: new Date('2026-08-12T12:00:00.000Z'),
+      ticketTiers: [
+        {
+          id: 'tier-general',
+          type: 'GENERAL',
+          name: 'Pista',
+          description: 'Entrada geral',
+          price: { toString: () => '129' },
+          capacity: 400,
+          availableQuantity: 400,
+        },
+      ],
     });
 
     const result = await service.findOne('aurora-live-sessions');
@@ -109,6 +145,190 @@ describe('EventsService', () => {
   it('does not expose draft or unknown events', async () => {
     await expect(service.findOne('evento-inexistente')).rejects.toBeInstanceOf(
       NotFoundException,
+    );
+  });
+
+  it('lists only events owned by the authenticated organizer', async () => {
+    await service.findMine('organizer-1');
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { organizerId: 'organizer-1' },
+      }),
+    );
+  });
+
+  it('rejects inventory above the event capacity', async () => {
+    await expect(
+      service.createForOrganizer(
+        {
+          id: 'organizer-1',
+          name: 'Organizador',
+          email: 'organizer@example.com',
+          role: 'ORGANIZER',
+        },
+        {
+          externalId: 'demo-coldplay',
+          title: 'Coldplay no Brasil',
+          description: 'Descricao completa do evento.',
+          category: 'Rock',
+          date: '2099-09-20T22:00:00.000Z',
+          venue: 'Arena EventDev',
+          city: 'Sao Paulo',
+          state: 'SP',
+          price: 250,
+          capacity: 100,
+          availableQuantity: 120,
+        },
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('publishes the event with the authenticated organizer and catalog snapshot', async () => {
+    create.mockResolvedValue({
+      id: 'event-1',
+      slug: 'coldplay-no-brasil-12345678',
+      title: 'Coldplay no Brasil',
+      description: 'Descricao completa do evento.',
+      category: 'Rock',
+      date: new Date('2099-09-20T22:00:00.000Z'),
+      venue: 'Arena EventDev',
+      city: 'Sao Paulo',
+      state: 'SP',
+      imageUrl: '/events/aurora-live.png',
+      imageAlt: 'Imagem de Coldplay',
+      catalogProvider: 'TICKETMASTER',
+      catalogExternalId: 'demo-coldplay',
+      mode: 'IN_PERSON',
+      price: { toString: () => '250' },
+      capacity: 100,
+      availableQuantity: 100,
+      featured: false,
+      featuredOrder: null,
+      status: 'PUBLISHED',
+      createdAt: new Date('2026-08-13T12:00:00.000Z'),
+      ticketTiers: [],
+    });
+
+    await service.createForOrganizer(
+      {
+        id: 'organizer-1',
+        name: 'Organizador',
+        email: 'organizer@example.com',
+        role: 'ORGANIZER',
+      },
+      {
+        externalId: 'demo-coldplay',
+        title: 'Coldplay no Brasil',
+        description: 'Descricao completa do evento.',
+        category: 'Rock',
+        date: '2099-09-20T22:00:00.000Z',
+        venue: 'Arena EventDev',
+        city: 'Sao Paulo',
+        state: 'SP',
+        price: 250,
+        capacity: 100,
+        availableQuantity: 100,
+      },
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          organizerId: 'organizer-1',
+          catalogExternalId: 'demo-coldplay',
+          status: EventStatus.PUBLISHED,
+          capacity: 100,
+          availableQuantity: 100,
+          ticketTiers: {
+            create: [
+              expect.objectContaining({
+                type: 'GENERAL',
+                price: 250,
+                capacity: 80,
+                availableQuantity: 80,
+              }),
+              expect.objectContaining({
+                type: 'PREMIUM',
+                price: 400,
+                capacity: 20,
+                availableQuantity: 20,
+              }),
+            ],
+          },
+        }),
+      }),
+    );
+  });
+
+  it('fills general admission before premium when initial inventory is partial', async () => {
+    create.mockResolvedValue({
+      id: 'event-2',
+      slug: 'evento-parcial-12345678',
+      title: 'Evento parcial',
+      description: 'Descricao completa do evento.',
+      category: 'Show',
+      date: new Date('2099-09-20T22:00:00.000Z'),
+      venue: 'Arena EventDev',
+      city: 'Sao Paulo',
+      state: 'SP',
+      imageUrl: '/events/aurora-live.png',
+      imageAlt: 'Imagem do evento',
+      catalogProvider: 'TICKETMASTER',
+      catalogExternalId: 'demo-coldplay',
+      mode: 'IN_PERSON',
+      price: { toString: () => '100' },
+      capacity: 100,
+      availableQuantity: 50,
+      featured: false,
+      featuredOrder: null,
+      status: 'PUBLISHED',
+      createdAt: new Date('2026-08-13T12:00:00.000Z'),
+      ticketTiers: [],
+    });
+
+    await service.createForOrganizer(
+      {
+        id: 'organizer-1',
+        name: 'Organizador',
+        email: 'organizer@example.com',
+        role: 'ORGANIZER',
+      },
+      {
+        externalId: 'demo-coldplay',
+        title: 'Evento parcial',
+        description: 'Descricao completa do evento.',
+        category: 'Show',
+        date: '2099-09-20T22:00:00.000Z',
+        venue: 'Arena EventDev',
+        city: 'Sao Paulo',
+        state: 'SP',
+        price: 100,
+        capacity: 100,
+        availableQuantity: 50,
+      },
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          ticketTiers: {
+            create: [
+              expect.objectContaining({
+                type: 'GENERAL',
+                capacity: 80,
+                availableQuantity: 50,
+              }),
+              expect.objectContaining({
+                type: 'PREMIUM',
+                capacity: 20,
+                availableQuantity: 0,
+              }),
+            ],
+          },
+        }),
+      }),
     );
   });
 });

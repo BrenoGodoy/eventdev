@@ -4,7 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CalendarDays, LogOut, Search } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  LayoutGrid,
+  LogOut,
+  Plus,
+  Search,
+  TicketCheck,
+} from "lucide-react";
 import { AuthSession } from "../../lib/auth";
 import { roleNavigation } from "../../lib/role-navigation";
 import { Brand } from "../brand/Brand";
@@ -61,9 +69,30 @@ export function SiteHeader({
             <CalendarDays aria-hidden="true" size={19} />
             Eventos
           </Link>
+          {session?.user.role === "ORGANIZER" && (
+            <div className={styles.organizerNav}>
+              <Link className={styles.organizerLink} href="/organizador/eventos/novo">
+                <Plus aria-hidden="true" size={19} />
+                <span>Criar evento</span>
+              </Link>
+              <Link className={styles.organizerLink} href="/organizador/eventos">
+                <LayoutGrid aria-hidden="true" size={19} />
+                <span>Meus eventos</span>
+              </Link>
+            </div>
+          )}
+          {session?.user.role === "CUSTOMER" && (
+            <Link className={styles.customerLink} href="/meus-ingressos">
+              <TicketCheck aria-hidden="true" size={19} />
+              <span>Meus ingressos</span>
+            </Link>
+          )}
           {session ? (
             <>
-              <Link className={styles.profile} href="/#painel">
+              <Link
+                className={styles.profile}
+                href={navigationContent?.href ?? "/#painel"}
+              >
                 <Image
                   alt={`Perfil de ${session.user.name}`}
                   className={styles.profileImage}

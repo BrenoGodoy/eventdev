@@ -16,21 +16,27 @@ const roleHome = {
     summary: "Publique eventos a partir do catalogo e acompanhe estoque, receita e check-ins.",
     stats: ["Catalogo integrado", "R$ 18.420 receita", "74% ocupacao"],
     primary: "Novo evento",
-    secondary: "Ver analytics",
+    primaryHref: "/organizador/eventos/novo",
+    secondary: "Meus eventos",
+    secondaryHref: "/organizador/eventos",
   },
   CUSTOMER: {
     title: "Home do cliente",
     summary: "Explore eventos publicados, reserve lugares e acompanhe seus ingressos.",
     stats: ["Eventos publicados", "1 ticket ativo", "Checkout demo"],
     primary: "Explorar eventos",
+    primaryHref: "/eventos",
     secondary: "Meus ingressos",
+    secondaryHref: "/meus-ingressos",
   },
   GATE: {
     title: "Console da portaria",
     summary: "Valide QR ou codigo manual com retorno grande, direto e auditavel.",
     stats: ["Scanner mobile-first", "Codigo manual", "Historico local"],
     primary: "Abrir scanner",
+    primaryHref: "#painel",
     secondary: "Ultimas leituras",
+    secondaryHref: "#painel",
   },
 };
 
@@ -88,7 +94,7 @@ export default function HomePage() {
             {session && navigationContent ? (
               <Link
                 className={`${actions.action} ${actions.secondary}`}
-                href="#painel"
+                href={navigationContent.href}
               >
                 {navigationContent.label}
               </Link>
@@ -126,18 +132,18 @@ export default function HomePage() {
                   ))}
                 </div>
                 <div className={styles.roleActions}>
-                  <button
+                  <Link
                     className={`${actions.action} ${actions.primary} ${styles.primaryOnDark}`}
-                    type="button"
+                    href={roleContent.primaryHref}
                   >
                     {roleContent.primary}
-                  </button>
-                  <button
+                  </Link>
+                  <Link
                     className={`${actions.action} ${actions.secondary} ${styles.secondaryOnDark}`}
-                    type="button"
+                    href={roleContent.secondaryHref}
                   >
                     {roleContent.secondary}
-                  </button>
+                  </Link>
                 </div>
               </div>
             </>

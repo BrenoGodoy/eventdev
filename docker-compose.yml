@@ -28,6 +28,10 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://eventdev:eventdev@postgres:5432/eventdev?schema=public
+      JWT_SECRET: eventdev-docker-development-secret-change-in-production
+      TICKETMASTER_API_KEY: ${TICKETMASTER_API_KEY:-}
+      RESERVATION_HOLD_MINUTES: ${RESERVATION_HOLD_MINUTES:-10}
+      TICKET_SIGNING_SECRET: ${TICKET_SIGNING_SECRET:-eventdev-docker-ticket-signing-secret}
       NODE_ENV: development
       PORT: 3001
     ports:

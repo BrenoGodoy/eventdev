@@ -25,6 +25,15 @@ enum EventStatus {
   FINISHED
 }
 
+enum TicketTierType {
+  GENERAL
+  PREMIUM
+}
+
+enum CatalogProvider {
+  TICKETMASTER
+}
+
 enum EventSeatStatus {
   AVAILABLE
   HELD
@@ -62,6 +71,7 @@ enum GateCheckResult {
 
 model User {
   id              String        @id @default(cuid())
+  name            String
   email           String        @unique
   passwordHash    String
   role            UserRole      @default(CUSTOMER)
@@ -86,13 +96,18 @@ model Event {
   state           String        @db.Char(2)
   imageUrl        String
   imageAlt        String
+  catalogProvider CatalogProvider?
+  catalogExternalId String?
   mode            EventMode
   price           Decimal       @db.Decimal(10, 2)
+  capacity        Int
+  availableQuantity Int
   featured        Boolean       @default(false)
   featuredOrder   Int?
   status          EventStatus   @default(DRAFT)
   organizerId     String
   organizer       User          @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Restrict)
+  ticketTiers     EventTicketTier[]
   seats           EventSeat[]
   reservations    Reservation[]
   tickets         Ticket[]
@@ -104,6 +119,27 @@ model Event {
   @@index([status, date])
   @@index([state, date])
   @@index([featured, featuredOrder])
+  @@index([catalogProvider, catalogExternalId])
+}
+
+model EventTicketTier {
+  id                String          @id @default(cuid())
+  eventId           String
+  type              TicketTierType
+  name              String
+  description       String
+  price             Decimal         @db.Decimal(10, 2)
+  capacity          Int
+  availableQuantity Int
+  active            Boolean         @default(true)
+  event              Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reservationItems   ReservationItem[]
+  tickets            Ticket[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@unique([eventId, type])
+  @@index([eventId, active])
 }
 
 model EventSeat {
@@ -135,6 +171,7 @@ model Reservation {
   paymentStatus PaymentStatus     @default(PENDING)
   user          User              @relation(fields: [userId], references: [id], onDelete: Restrict)
   event         Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  items         ReservationItem[]
   seats         EventSeat[]
   tickets       Ticket[]
   createdAt     DateTime          @default(now())
@@ -142,12 +179,29 @@ model Reservation {
 
   @@index([userId])
   @@index([eventId])
+  @@index([status, expiresAt])
+}
+
+model ReservationItem {
+  id            String          @id @default(cuid())
+  reservationId String
+  tierId        String
+  quantity      Int
+  unitPrice     Decimal         @db.Decimal(10, 2)
+  subtotal      Decimal         @db.Decimal(10, 2)
+  reservation   Reservation     @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  tier          EventTicketTier @relation(fields: [tierId], references: [id], onDelete: Restrict)
+  createdAt     DateTime        @default(now())
+
+  @@unique([reservationId, tierId])
+  @@index([tierId])
 }
 
 model Ticket {
   id            String       @id @default(cuid())
   reservationId String
   eventId       String
+  tierId        String?
   seatId        String?      @unique
   publicCode    String       @unique
   signature     String
@@ -156,6 +210,7 @@ model Ticket {
   status        TicketStatus @default(ACTIVE)
   reservation   Reservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tier          EventTicketTier? @relation(fields: [tierId], references: [id], onDelete: Restrict)
   seat          EventSeat?   @relation(fields: [seatId], references: [id], onDelete: SetNull)
   gateChecks    GateCheck[]
   shareTokens   ShareToken[]
@@ -164,6 +219,7 @@ model Ticket {
 
   @@index([reservationId])
   @@index([eventId])
+  @@index([tierId])
 }
 
 model GateCheck {

@@ -7,7 +7,6 @@ export type AuthUser = {
   name: string;
   email: string;
   role: UserRole;
-  scenario: string;
 };
 
 export type AuthSession = {
@@ -29,19 +28,19 @@ export const demoAccounts: DemoAccount[] = [
     role: 'ORGANIZER',
     label: 'Organizador',
     email: 'organizer@elite.dev',
-    password: 'Elite123!',
+    password: 'Organizer123!',
   },
   {
     role: 'CUSTOMER',
     label: 'Cliente',
-    email: 'cliente1@elite.dev',
-    password: 'Elite123!',
+    email: 'cliente@elite.dev',
+    password: 'Cliente123!',
   },
   {
     role: 'GATE',
     label: 'Portaria',
     email: 'portaria@elite.dev',
-    password: 'Elite123!',
+    password: 'Portaria123!',
   },
 ];
 

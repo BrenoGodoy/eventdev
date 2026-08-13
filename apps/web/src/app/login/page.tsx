@@ -28,7 +28,15 @@ export default function LoginPage() {
     try {
       const session = await login(email, password);
       storeSession(session);
-      router.push("/");
+      const requestedRedirect = new URLSearchParams(window.location.search).get(
+        "redirect",
+      );
+      const redirect =
+        requestedRedirect?.startsWith("/") &&
+        !requestedRedirect.startsWith("//")
+          ? requestedRedirect
+          : "/";
+      router.push(redirect);
     } catch (loginError) {
       setError(
         loginError instanceof Error

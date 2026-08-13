@@ -12,10 +12,27 @@ export type CatalogEvent = {
   state: string;
   imageUrl: string;
   imageAlt: string;
+  catalogProvider: "TICKETMASTER" | null;
+  catalogExternalId: string | null;
   mode: "ONLINE" | "IN_PERSON" | "HYBRID";
   price: number;
+  capacity: number;
+  availableQuantity: number;
   featured: boolean;
   featuredOrder: number | null;
+  status: "DRAFT" | "PUBLISHED" | "CANCELED" | "FINISHED";
+  createdAt: string;
+  ticketTiers: EventTicketTier[];
+};
+
+export type EventTicketTier = {
+  id: string;
+  type: "GENERAL" | "PREMIUM";
+  name: string;
+  description: string;
+  price: number;
+  capacity: number;
+  availableQuantity: number;
 };
 
 export type EventFilters = {

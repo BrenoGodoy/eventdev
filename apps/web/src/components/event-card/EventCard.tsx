@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, Ticket } from "lucide-react";
 import {
   CatalogEvent,
   formatEventDate,
@@ -11,9 +11,17 @@ import styles from "./EventCard.module.css";
 
 type EventCardProps = {
   event: CatalogEvent;
+  showInventory?: boolean;
 };
 
-export function EventCard({ event }: EventCardProps) {
+const statusLabels = {
+  DRAFT: "Rascunho",
+  PUBLISHED: "Publicado",
+  CANCELED: "Cancelado",
+  FINISHED: "Finalizado",
+};
+
+export function EventCard({ event, showInventory = false }: EventCardProps) {
   return (
     <article className={styles.card}>
       <Link
@@ -30,6 +38,9 @@ export function EventCard({ event }: EventCardProps) {
             src={event.imageUrl}
           />
           <span className={styles.category}>{event.category}</span>
+          {showInventory && (
+            <span className={styles.status}>{statusLabels[event.status]}</span>
+          )}
         </div>
         <div className={styles.content}>
           <div className={styles.titleRow}>
@@ -48,6 +59,14 @@ export function EventCard({ event }: EventCardProps) {
               {formatEventDate(event.date)} · {formatEventTime(event.date)}
             </span>
           </p>
+          {showInventory && (
+            <p className={`${styles.meta} ${styles.inventory}`}>
+              <Ticket aria-hidden="true" size={17} />
+              <span>
+                {event.availableQuantity} de {event.capacity} disponiveis
+              </span>
+            </p>
+          )}
         </div>
       </Link>
     </article>

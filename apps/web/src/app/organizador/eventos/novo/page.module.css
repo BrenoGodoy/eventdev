@@ -1,0 +1,500 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-paper);
+}
+
+.workspace {
+  width: min(100%, var(--content-max-width));
+  margin: 0 auto;
+  padding: 2.5rem var(--page-gutter) 5rem;
+}
+
+.headingRow {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.eyebrow {
+  margin-bottom: 0.55rem;
+  color: var(--color-violet);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.headingRow h1 {
+  max-width: 54rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1;
+}
+
+.steps {
+  display: flex;
+  gap: 0;
+  margin: 2.25rem 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  min-width: 10rem;
+  align-items: center;
+  gap: 0.55rem;
+  border-bottom: 3px solid var(--color-line);
+  color: var(--color-text-muted);
+  padding: 0.7rem 0;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.steps li > span {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-line);
+  color: var(--color-ink);
+}
+
+.steps .activeStep {
+  border-color: var(--color-violet);
+  color: var(--color-ink);
+}
+
+.steps .activeStep > span {
+  background: var(--color-violet);
+  color: var(--color-surface);
+}
+
+.steps .doneStep {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.steps .doneStep > span {
+  background: var(--color-acid);
+}
+
+.error,
+.notice {
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--color-danger);
+  background: var(--color-danger-soft);
+  padding: 0.9rem 1rem;
+  color: var(--color-danger);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.notice {
+  border-color: var(--color-acid);
+  background: #f6fadf;
+  color: var(--color-ink);
+}
+
+.catalogStep {
+  border-top: 1px solid var(--color-line);
+  padding-top: 2rem;
+}
+
+.catalogSearch {
+  display: grid;
+  min-height: 4rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: 0 0.5rem 1.5rem rgb(11 16 32 / 7%);
+}
+
+.catalogSearch > svg {
+  margin-left: 1.25rem;
+  color: var(--color-violet);
+}
+
+.catalogSearch input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  padding: 1.1rem;
+  font-size: 1rem;
+}
+
+.catalogSearch button {
+  align-self: stretch;
+  background: var(--color-violet);
+  color: var(--color-surface);
+  padding: 0 1.75rem;
+  font-weight: 900;
+}
+
+.catalogSearch:focus-within {
+  border-color: var(--color-violet);
+  box-shadow: var(--shadow-focus);
+}
+
+.attractionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 2rem 1.25rem;
+  margin-top: 2.25rem;
+}
+
+.attraction {
+  min-width: 0;
+}
+
+.attraction > button {
+  width: 100%;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.attractionImage {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-ink);
+}
+
+.coverImage {
+  object-fit: cover;
+  transition: transform 260ms ease;
+}
+
+.attraction:hover .coverImage {
+  transform: scale(1.025);
+}
+
+.attractionImage > span {
+  position: absolute;
+  bottom: 0.65rem;
+  left: 0.65rem;
+  border-radius: var(--radius-sm);
+  background: rgb(11 16 32 / 88%);
+  color: var(--color-surface);
+  padding: 0.4rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.attractionCopy {
+  display: grid;
+  gap: 0.45rem;
+  padding-top: 0.9rem;
+}
+
+.attractionCopy p {
+  color: var(--color-violet);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.attractionCopy h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.selectAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-success);
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.emptyCatalog,
+.loading {
+  display: grid;
+  min-height: 23rem;
+  place-content: center;
+  justify-items: center;
+  gap: 0.55rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.emptyCatalog svg {
+  color: var(--color-violet);
+}
+
+.emptyCatalog strong {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.eventForm {
+  display: grid;
+  grid-template-columns: minmax(17rem, 0.65fr) minmax(0, 1.35fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+  border-top: 1px solid var(--color-line);
+  padding-top: 2rem;
+}
+
+.sourcePanel {
+  position: sticky;
+  top: 7.25rem;
+}
+
+.sourceImage {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  background: var(--color-ink);
+}
+
+.sourceMeta {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 1rem;
+}
+
+.sourceMeta p {
+  color: var(--color-violet);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sourceMeta h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.sourceMeta a,
+.sourceMeta button {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.sourceMeta a:hover,
+.sourceMeta button:hover {
+  color: var(--color-violet-dark);
+}
+
+.fields {
+  display: grid;
+  gap: 2.25rem;
+}
+
+.formSection {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: 2.25rem;
+}
+
+.sectionHeading {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.sectionHeading svg {
+  color: var(--color-violet);
+}
+
+.sectionHeading h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
+.field > span {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.field > input,
+.field textarea,
+.field select,
+.iconField,
+.priceField {
+  width: 100%;
+  min-height: 3.25rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  outline: 0;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: 0 0.9rem;
+}
+
+.field textarea {
+  min-height: 12rem;
+  resize: vertical;
+  padding-top: 0.9rem;
+  line-height: 1.55;
+}
+
+.field > input:focus,
+.field textarea:focus,
+.field select:focus,
+.iconField:focus-within,
+.priceField:focus-within {
+  border-color: var(--color-violet);
+  box-shadow: var(--shadow-focus);
+}
+
+.iconField,
+.priceField {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.iconField svg {
+  color: var(--color-violet);
+}
+
+.iconField input,
+.priceField input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0.75rem 0;
+}
+
+.priceField > span {
+  color: var(--color-success);
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.publishBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--color-ink);
+  color: var(--color-surface);
+  padding: 1.25rem;
+}
+
+.publishBar > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.publishBar span {
+  color: var(--color-text-soft);
+  font-size: 0.84rem;
+}
+
+.publishBar button {
+  gap: 0.45rem;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+  .eventForm {
+    grid-template-columns: 1fr;
+  }
+
+  .sourcePanel {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.65fr) minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .sourceMeta {
+    align-content: start;
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .workspace {
+    padding-top: 1.75rem;
+  }
+
+  .headingRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .steps li {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .catalogSearch {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .catalogSearch button {
+    grid-column: 1 / -1;
+    min-height: 3.25rem;
+  }
+
+  .attractionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sourcePanel {
+    grid-template-columns: 1fr;
+  }
+
+  .sourceImage {
+    aspect-ratio: 16 / 9;
+  }
+
+  .formSection {
+    grid-template-columns: 1fr;
+  }
+
+  .fullField,
+  .sectionHeading {
+    grid-column: auto;
+  }
+
+  .publishBar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .publishBar button {
+    width: 100%;
+  }
+}

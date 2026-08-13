@@ -134,7 +134,11 @@ export function EventDetails({ slug }: EventDetailsProps) {
                   <Link
                     aria-label={`Comprar ingresso para ${event.title}`}
                     className={styles.buyButton}
-                    href={session ? "/#painel" : "/login"}
+                    href={
+                      session
+                        ? `/eventos/${event.slug}/checkout`
+                        : `/login?redirect=${encodeURIComponent(`/eventos/${event.slug}/checkout`)}`
+                    }
                   >
                     Comprar ingresso
                     <ArrowRight aria-hidden="true" size={20} />

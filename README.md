@@ -31,10 +31,66 @@ apps/web/src/
 
 ## Credenciais demo
 
-Use a senha `Elite123!` para as tres contas:
+As contas abaixo são criadas no PostgreSQL pelas migrations. Cada uma possui um
+papel distinto e deve ser usada apenas para desenvolvimento e avaliação local.
 
-| Papel | E-mail |
-| --- | --- |
-| Organizador | `organizer@elite.dev` |
-| Cliente | `cliente1@elite.dev` |
-| Portaria | `portaria@elite.dev` |
+| Nome | Papel | E-mail | Senha | Acesso esperado |
+| --- | --- | --- | --- | --- |
+| Organizador Elite | Organizador | `organizer@elite.dev` | `Organizer123!` | Criar e gerenciar eventos |
+| Cliente Elite | Cliente | `cliente@elite.dev` | `Cliente123!` | Reservar, pagar e acessar ingressos |
+| Portaria Elite | Portaria | `portaria@elite.dev` | `Portaria123!` | Validar ingressos na entrada |
+
+As senhas são armazenadas exclusivamente como hashes bcrypt. Após o login, a API
+emite um JWT de oito horas. Rotas protegidas recarregam o usuário do banco e aplicam
+o papel atual por meio dos guards globais de autenticação e autorização.
+
+## Integracao com a Ticketmaster
+
+O fluxo do organizador usa a Discovery API para pesquisar **atracoes**. A
+Ticketmaster fornece a identidade editorial inicial (nome, imagem e
+classificacao), enquanto data, horario, local, descricao, preco e estoque sao
+definidos no EventDev e persistidos no PostgreSQL.
+
+Crie uma chave no portal de desenvolvedores da Ticketmaster e informe-a antes
+de subir o ambiente:
+
+```bash
+export TICKETMASTER_API_KEY="sua-chave"
+npm run docker:dev
+```
+
+Para execucao local da API, a mesma variavel pode ser adicionada a
+`apps/api/.env`. Sem a chave, o backend ativa um catalogo local sinalizado na
+interface, permitindo testar criacao e publicacao sem simular uma chamada
+externa. Eventos so entram no catalogo publico depois que o organizador os
+publica; a atracao externa, sozinha, nunca vira um evento do EventDev.
+
+Rotas do organizador:
+
+- `/organizador/eventos/novo`: busca uma atracao e publica um evento.
+- `/organizador/eventos`: lista apenas os eventos do organizador autenticado.
+
+## Reservas e ingressos
+
+Eventos publicados possuem dois lotes por quantidade: **Pista** e **Pista
+Premium**. Cada reserva bloqueia o estoque por dez minutos. A baixa usa uma
+atualizacao condicional dentro de uma transacao PostgreSQL, impedindo duas
+reservas concorrentes de consumir as mesmas unidades. Reservas expiradas
+devolvem o estoque de cada lote automaticamente.
+
+O pagamento e simulado com cenarios aprovado e recusado. A recusa permite nova
+tentativa durante o prazo da reserva; a aprovacao confirma a compra e emite um
+ingresso por unidade. Cada QR inclui um codigo publico, nonce e assinatura HMAC
+gerada exclusivamente pela API.
+
+Variaveis opcionais para desenvolvimento:
+
+```env
+RESERVATION_HOLD_MINUTES=10
+TICKET_SIGNING_SECRET="um-segredo-diferente-do-jwt"
+```
+
+Rotas do cliente:
+
+- `/eventos/:slug/checkout`: selecao, reserva e pagamento simulado.
+- `/meus-ingressos`: carteira com os QRs assinados do cliente autenticado.
