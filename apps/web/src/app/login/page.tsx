@@ -7,12 +7,6 @@ import actions from "../../components/ui/Action.module.css";
 import { demoAccounts, login, storeSession } from "../../lib/auth";
 import styles from "./page.module.css";
 
-const roleLabel = {
-  ORGANIZER: "Organizador",
-  CUSTOMER: "Cliente",
-  GATE: "Portaria",
-};
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState(demoAccounts[0].email);
@@ -101,7 +95,7 @@ export default function LoginPage() {
                     selectAccount(account.email, account.password)
                   }
                 >
-                  <span>{roleLabel[account.role]}</span>
+                  <span>{account.label}</span>
                   <strong>{account.email}</strong>
                 </button>
               );

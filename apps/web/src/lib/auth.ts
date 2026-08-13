@@ -32,9 +32,15 @@ export const demoAccounts: DemoAccount[] = [
   },
   {
     role: 'CUSTOMER',
-    label: 'Cliente',
+    label: 'Cliente principal',
     email: 'cliente@elite.dev',
     password: 'Cliente123!',
+  },
+  {
+    role: 'CUSTOMER',
+    label: 'Cliente convidado',
+    email: 'cliente2@elite.dev',
+    password: 'Cliente2123!',
   },
   {
     role: 'GATE',

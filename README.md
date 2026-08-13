@@ -38,6 +38,7 @@ papel distinto e deve ser usada apenas para desenvolvimento e avaliação local.
 | --- | --- | --- | --- | --- |
 | Organizador Elite | Organizador | `organizer@elite.dev` | `Organizer123!` | Criar e gerenciar eventos |
 | Cliente Elite | Cliente | `cliente@elite.dev` | `Cliente123!` | Reservar, pagar e acessar ingressos |
+| Cliente Convidado | Cliente | `cliente2@elite.dev` | `Cliente2123!` | Percorrer uma segunda jornada de compra independente |
 | Portaria Elite | Portaria | `portaria@elite.dev` | `Portaria123!` | Validar ingressos na entrada |
 
 As senhas são armazenadas exclusivamente como hashes bcrypt. Após o login, a API
@@ -64,6 +65,14 @@ Para execucao local da API, a mesma variavel pode ser adicionada a
 interface, permitindo testar criacao e publicacao sem simular uma chamada
 externa. Eventos so entram no catalogo publico depois que o organizador os
 publica; a atracao externa, sozinha, nunca vira um evento do EventDev.
+
+O banco de demonstracao inclui seis eventos publicados baseados em atracoes
+reais consultadas na Discovery API: Coldplay, Harry Styles, Guns N' Roses, The
+Mission, Pink Floyd e Fleetwood Mac. Nome editorial, imagem e classificacao
+ficam preservados no `catalogSnapshot`; datas, locais, precos e estoques sao
+fixtures do EventDev e nao representam uma agenda oficial dos artistas. Todos
+os eventos possuem lotes **Pista** e **Pista Premium** com ingressos disponiveis
+para percorrer o fluxo completo.
 
 Rotas do organizador:
 
