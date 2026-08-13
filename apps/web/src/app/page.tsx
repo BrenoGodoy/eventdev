@@ -2,26 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowRight, CalendarDays, LogOut, Search } from "lucide-react";
-import { Brand } from "../components/brand/Brand";
+import { useMemo } from "react";
 import { FeaturedCarousel } from "../components/featured-carousel/FeaturedCarousel";
+import { SiteHeader } from "../components/site-header/SiteHeader";
 import actions from "../components/ui/Action.module.css";
-import { AuthSession, clearSession, readSession } from "../lib/auth";
+import { roleNavigation } from "../lib/role-navigation";
+import { useAuthSession } from "../lib/use-auth-session";
 import styles from "./page.module.css";
 
 const roleHome = {
   ORGANIZER: {
     title: "Painel do organizador",
     summary: "Publique eventos a partir do catalogo e acompanhe estoque, receita e check-ins.",
-    stats: ["2 eventos seed", "R$ 18.420 receita", "74% ocupacao"],
+    stats: ["Catalogo integrado", "R$ 18.420 receita", "74% ocupacao"],
     primary: "Novo evento",
     secondary: "Ver analytics",
   },
   CUSTOMER: {
     title: "Home do cliente",
     summary: "Explore eventos publicados, reserve lugares e acompanhe seus ingressos.",
-    stats: ["2 eventos publicados", "1 ticket ativo", "Checkout demo"],
+    stats: ["Eventos publicados", "1 ticket ativo", "Checkout demo"],
     primary: "Explorar eventos",
     secondary: "Meus ingressos",
   },
@@ -34,35 +34,8 @@ const roleHome = {
   },
 };
 
-const roleNavigation = {
-  ORGANIZER: {
-    label: "Ir para o painel do organizador",
-    profileImage: "/profiles/organizer.png",
-  },
-  CUSTOMER: {
-    label: "Ir para o painel do cliente",
-    profileImage: "/profiles/customer.png",
-  },
-  GATE: {
-    label: "Ir para o painel da portaria",
-    profileImage: "/profiles/gate.png",
-  },
-};
-
 export default function HomePage() {
-  const [session, setSession] = useState<AuthSession | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [eventFilter, setEventFilter] = useState("");
-
-  useEffect(() => {
-    const hydrationId = window.setTimeout(() => {
-      setSession(readSession());
-      setIsReady(true);
-    }, 0);
-
-    return () => window.clearTimeout(hydrationId);
-  }, []);
+  const { session, isReady, logout } = useAuthSession();
 
   const roleContent = useMemo(() => {
     if (!session) {
@@ -72,88 +45,13 @@ export default function HomePage() {
     return roleHome[session.user.role];
   }, [session]);
 
-  function handleLogout() {
-    clearSession();
-    setSession(null);
-  }
-
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setEventFilter(searchValue.trim());
-
-    window.requestAnimationFrame(() => {
-      document.getElementById("eventos")?.scrollIntoView({ behavior: "smooth" });
-    });
-  }
-
   const navigationContent = session
     ? roleNavigation[session.user.role]
     : null;
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <Brand />
-          <form
-            className={styles.searchForm}
-            onSubmit={handleSearch}
-            role="search"
-          >
-            <Search aria-hidden="true" size={20} strokeWidth={2.2} />
-            <input
-              aria-label="Filtrar eventos"
-              onChange={(event) => setSearchValue(event.target.value)}
-              placeholder="Busque por evento, categoria ou cidade"
-              type="search"
-              value={searchValue}
-            />
-            <button aria-label="Buscar" type="submit">
-              <span>Buscar</span>
-              <ArrowRight
-                aria-hidden="true"
-                className={styles.searchArrow}
-                size={19}
-              />
-            </button>
-          </form>
-          <nav className={styles.nav} aria-label="Navegacao principal">
-            <Link className={styles.eventsLink} href="#eventos">
-              <CalendarDays aria-hidden="true" size={19} />
-              Eventos
-            </Link>
-            {session ? (
-              <>
-                <Link className={styles.profile} href="#painel">
-                  <Image
-                    alt={`Perfil de ${session.user.name}`}
-                    className={styles.profileImage}
-                    height={40}
-                    src={navigationContent?.profileImage ?? "/profiles/customer.png"}
-                    width={40}
-                  />
-                  <span className={styles.sessionName}>{session.user.name}</span>
-                </Link>
-                <button
-                  className={styles.logoutButton}
-                  onClick={handleLogout}
-                  type="button"
-                >
-                  <LogOut aria-hidden="true" size={18} />
-                  Sair
-                </button>
-              </>
-            ) : (
-              <Link
-                className={`${actions.action} ${actions.ghost}`}
-                href="/login"
-              >
-                Entrar
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
+      <SiteHeader onLogout={logout} session={session} />
 
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={styles.heroMedia}>
@@ -183,7 +81,7 @@ export default function HomePage() {
           <div className={styles.heroActions}>
             <Link
               className={`${actions.action} ${actions.primary}`}
-              href="#eventos"
+              href="/eventos"
             >
               Eventos em destaque
             </Link>
@@ -206,7 +104,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <FeaturedCarousel key={eventFilter} query={eventFilter} />
+      <FeaturedCarousel />
 
       <section
         className={styles.roleSection}

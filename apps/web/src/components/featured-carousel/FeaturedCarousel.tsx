@@ -1,96 +1,29 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, CalendarDays, MapPin } from "lucide-react";
-import { KeyboardEvent, PointerEvent, useCallback, useEffect, useRef, useState } from "react";
+import {
+  KeyboardEvent,
+  PointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  CatalogEvent,
+  fetchFeaturedEvents,
+  formatEventDate,
+  formatEventPrice,
+  formatEventTime,
+} from "../../lib/events";
 import styles from "./FeaturedCarousel.module.css";
-
-type FeaturedEvent = {
-  id: string;
-  category: string;
-  title: string;
-  venue: string;
-  city: string;
-  date: string;
-  time: string;
-  price: string;
-  image: string;
-  imageAlt: string;
-};
-
-const featuredEvents: FeaturedEvent[] = [
-  {
-    id: "aurora-live",
-    category: "Show",
-    title: "Aurora Live Sessions",
-    venue: "Arena Leste",
-    city: "Rio de Janeiro, RJ",
-    date: "Sabado, 22 de outubro",
-    time: "20:30",
-    price: "A partir de R$ 129",
-    image: "/events/aurora-live.png",
-    imageAlt:
-      "Palco contemporaneo iluminado em violeta e verde durante um show ao vivo",
-  },
-  {
-    id: "noite-sci-fi",
-    category: "Cinema",
-    title: "Noite Sci-Fi 2049",
-    venue: "Cine Rooftop Central",
-    city: "Sao Paulo, SP",
-    date: "Quinta, 15 de outubro",
-    time: "19:00",
-    price: "A partir de R$ 89",
-    image: "/events/noite-sci-fi.png",
-    imageAlt:
-      "Cinema ao ar livre em um terraco sob o ceu estrelado e luzes verdes",
-  },
-  {
-    id: "horizonte-conference",
-    category: "Conferencia",
-    title: "Horizonte Conference 2026",
-    venue: "Centro de Convencoes Aurora",
-    city: "Curitiba, PR",
-    date: "Sexta, 6 de novembro",
-    time: "09:00",
-    price: "A partir de R$ 210",
-    image: "/events/horizonte-conference.png",
-    imageAlt:
-      "Auditorio moderno com palco geometrico branco, violeta e verde acido",
-  },
-  {
-    id: "cena-aberta",
-    category: "Teatro",
-    title: "Cena Aberta",
-    venue: "Teatro Estacao",
-    city: "Belo Horizonte, MG",
-    date: "Domingo, 8 de novembro",
-    time: "18:00",
-    price: "A partir de R$ 72",
-    image: "/events/cena-aberta.png",
-    imageAlt:
-      "Dancarina em um palco escuro iluminado por um foco diante de cortinas vermelhas",
-  },
-  {
-    id: "pulso-urbano",
-    category: "Festival",
-    title: "Pulso Urbano Festival",
-    venue: "Parque das Artes",
-    city: "Sao Paulo, SP",
-    date: "Sabado, 14 de novembro",
-    time: "16:00",
-    price: "A partir de R$ 159",
-    image: "/events/pulso-urbano.png",
-    imageAlt:
-      "Festival de musica ao ar livre com palco violeta e estruturas verde acido",
-  },
-];
 
 const AUTOPLAY_INTERVAL = 5500;
 const SWIPE_THRESHOLD = 42;
 
-function getRelativeOffset(index: number, activeIndex: number) {
-  const length = featuredEvents.length;
+function getRelativeOffset(index: number, activeIndex: number, length: number) {
   let offset = index - activeIndex;
 
   if (offset > Math.floor(length / 2)) {
@@ -112,46 +45,54 @@ function getPositionClass(offset: number) {
   return styles.farRight;
 }
 
-type FeaturedCarouselProps = {
-  query?: string;
-};
-
-export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
-  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
-  const initialMatchIndex = normalizedQuery
-    ? featuredEvents.findIndex((event) =>
-        [
-          event.category,
-          event.title,
-          event.venue,
-          event.city,
-          event.date,
-        ]
-          .join(" ")
-          .toLocaleLowerCase("pt-BR")
-          .includes(normalizedQuery),
-      )
-    : -1;
-  const [activeIndex, setActiveIndex] = useState(
-    initialMatchIndex >= 0 ? initialMatchIndex : 0,
-  );
+export function FeaturedCarousel() {
+  const [featuredEvents, setFeaturedEvents] = useState<CatalogEvent[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const pointerStartX = useRef<number | null>(null);
+  const wasDragged = useRef(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetchFeaturedEvents(controller.signal)
+      .then((response) => setFeaturedEvents(response.events))
+      .catch((requestError: unknown) => {
+        if (requestError instanceof DOMException && requestError.name === "AbortError") {
+          return;
+        }
+
+        setError("Os eventos em destaque estao temporariamente indisponiveis.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
 
   const showNext = useCallback(() => {
-    setActiveIndex((current) => (current + 1) % featuredEvents.length);
-  }, []);
+    setActiveIndex((current) =>
+      featuredEvents.length ? (current + 1) % featuredEvents.length : 0,
+    );
+  }, [featuredEvents.length]);
 
   const showPrevious = useCallback(() => {
-    setActiveIndex(
-      (current) =>
-        (current - 1 + featuredEvents.length) % featuredEvents.length,
+    setActiveIndex((current) =>
+      featuredEvents.length
+        ? (current - 1 + featuredEvents.length) % featuredEvents.length
+        : 0,
     );
-  }, []);
+  }, [featuredEvents.length]);
 
   useEffect(() => {
     if (
       isPaused ||
+      featuredEvents.length < 2 ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
       return;
@@ -159,7 +100,7 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
 
     const autoplayId = window.setInterval(showNext, AUTOPLAY_INTERVAL);
     return () => window.clearInterval(autoplayId);
-  }, [isPaused, showNext]);
+  }, [featuredEvents.length, isPaused, showNext]);
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.key === "ArrowLeft") {
@@ -179,6 +120,7 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
     }
 
     pointerStartX.current = event.clientX;
+    wasDragged.current = false;
     event.currentTarget.setPointerCapture(event.pointerId);
     setIsPaused(true);
   }
@@ -192,6 +134,7 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
 
     const distance = event.clientX - pointerStartX.current;
     pointerStartX.current = null;
+    wasDragged.current = Math.abs(distance) >= SWIPE_THRESHOLD;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -204,7 +147,30 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
     if (distance < 0) showNext();
   }
 
-  const activeEvent = featuredEvents[activeIndex];
+  if (isLoading || error || featuredEvents.length === 0) {
+    return (
+      <section
+        className={styles.section}
+        id="eventos"
+        aria-labelledby="featured-title"
+      >
+        <div className={styles.heading}>
+          <div>
+            <p className={styles.eyebrow}>Selecao Elite</p>
+            <h2 id="featured-title">Eventos em destaque</h2>
+          </div>
+        </div>
+        <div className={styles.status} role={error ? "alert" : "status"}>
+          {error ||
+            (isLoading
+              ? "Carregando eventos em destaque..."
+              : "Nenhum evento em destaque publicado.")}
+        </div>
+      </section>
+    );
+  }
+
+  const activeEvent = featuredEvents[activeIndex] ?? featuredEvents[0];
 
   return (
     <section
@@ -229,13 +195,7 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
           <p className={styles.eyebrow}>Selecao Elite</p>
           <h2 id="featured-title">Eventos em destaque</h2>
         </div>
-        <p>
-          {query && initialMatchIndex < 0
-            ? `Nenhum resultado para "${query}". Veja nossa selecao.`
-            : query
-              ? `Resultado em destaque para "${query}"`
-              : `${featuredEvents.length} experiencias escolhidas para voce`}
-        </p>
+        <p>{featuredEvents.length} experiencias escolhidas para voce</p>
       </div>
 
       <div
@@ -246,6 +206,7 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
             event.currentTarget.releasePointerCapture(event.pointerId);
           }
           pointerStartX.current = null;
+          wasDragged.current = false;
           setIsPaused(
             Boolean(
               event.currentTarget.parentElement?.contains(
@@ -258,7 +219,11 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
         onPointerUp={handlePointerUp}
       >
         {featuredEvents.map((event, index) => {
-          const offset = getRelativeOffset(index, activeIndex);
+          const offset = getRelativeOffset(
+            index,
+            activeIndex,
+            featuredEvents.length,
+          );
           const isActive = offset === 0;
 
           return (
@@ -270,22 +235,34 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
               inert={!isActive}
               key={event.id}
             >
-              <div className={styles.imageFrame}>
-                <Image
-                  alt={event.imageAlt}
-                  className={styles.image}
-                  draggable={false}
-                  fill
-                  priority={index === 0}
-                  sizes="(max-width: 700px) 88vw, (max-width: 1200px) 74vw, 900px"
-                  src={event.image}
-                />
-                <div className={styles.imageShade} />
-                <div className={styles.ticketLabel}>
-                  <span>{event.category}</span>
-                  <strong>ED</strong>
+              <Link
+                aria-label={`Ver detalhes de ${event.title}`}
+                className={styles.eventLink}
+                href={`/eventos/${event.slug}`}
+                onClick={(clickEvent) => {
+                  if (wasDragged.current) {
+                    clickEvent.preventDefault();
+                    wasDragged.current = false;
+                  }
+                }}
+              >
+                <div className={styles.imageFrame}>
+                  <Image
+                    alt={event.imageAlt}
+                    className={styles.image}
+                    draggable={false}
+                    fill
+                    priority={index === 0}
+                    sizes="(max-width: 700px) 88vw, (max-width: 1200px) 74vw, 900px"
+                    src={event.imageUrl}
+                  />
+                  <div className={styles.imageShade} />
+                  <div className={styles.ticketLabel}>
+                    <span>{event.category}</span>
+                    <strong>ED</strong>
+                  </div>
                 </div>
-              </div>
+              </Link>
             </article>
           );
         })}
@@ -341,18 +318,22 @@ export function FeaturedCarousel({ query = "" }: FeaturedCarouselProps) {
         key={activeEvent.id}
       >
         <p>{activeEvent.category}</p>
-        <h3>{activeEvent.title}</h3>
+        <h3>
+          <Link href={`/eventos/${activeEvent.slug}`}>
+            {activeEvent.title}
+          </Link>
+        </h3>
         <div className={styles.metadata}>
           <span>
             <MapPin aria-hidden="true" size={18} />
-            {activeEvent.venue} - {activeEvent.city}
+            {activeEvent.venue} - {activeEvent.city}, {activeEvent.state}
           </span>
           <span>
             <CalendarDays aria-hidden="true" size={18} />
-            {activeEvent.date} as {activeEvent.time}
+            {formatEventDate(activeEvent.date)} as {formatEventTime(activeEvent.date)}
           </span>
         </div>
-        <strong>{activeEvent.price}</strong>
+        <strong>A partir de {formatEventPrice(activeEvent.price)}</strong>
       </div>
     </section>
   );

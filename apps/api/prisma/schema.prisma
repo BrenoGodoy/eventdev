@@ -75,11 +75,21 @@ model User {
 model Event {
   id              String        @id @default(cuid())
   slug            String        @unique
+  title           String
+  /// Markdown content rendered on the public event page.
+  description     String
+  category        String
   catalogSnapshot Json
   date            DateTime
   venue           String
+  city            String
+  state           String        @db.Char(2)
+  imageUrl        String
+  imageAlt        String
   mode            EventMode
   price           Decimal       @db.Decimal(10, 2)
+  featured        Boolean       @default(false)
+  featuredOrder   Int?
   status          EventStatus   @default(DRAFT)
   organizerId     String
   organizer       User          @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Restrict)
@@ -91,6 +101,9 @@ model Event {
   updatedAt       DateTime      @updatedAt
 
   @@index([organizerId])
+  @@index([status, date])
+  @@index([state, date])
+  @@index([featured, featuredOrder])
 }
 
 model EventSeat {

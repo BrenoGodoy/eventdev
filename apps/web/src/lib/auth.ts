@@ -1,3 +1,5 @@
+import { apiBaseUrl } from "./api";
+
 export type UserRole = 'ORGANIZER' | 'CUSTOMER' | 'GATE';
 
 export type AuthUser = {
@@ -44,9 +46,6 @@ export const demoAccounts: DemoAccount[] = [
 ];
 
 const STORAGE_KEY = 'eventdev.session';
-
-export const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export async function login(email: string, password: string) {
   const response = await fetch(`${apiBaseUrl}/auth/login`, {
