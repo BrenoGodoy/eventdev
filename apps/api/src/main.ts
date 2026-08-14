@@ -1,20 +1,9 @@
 import 'dotenv/config';
 import { Logger } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { corsOrigins, validateEnvironment } from './config/environment';
+import { createApplication } from './application';
 
 async function bootstrap() {
-  validateEnvironment();
-  const app = await NestFactory.create(AppModule);
-
-  app.setGlobalPrefix('api');
-
-  app.enableCors({
-    origin: corsOrigins(),
-    credentials: true,
-  });
-
+  const app = await createApplication();
   await app.listen(process.env.PORT ?? 3001);
 }
 

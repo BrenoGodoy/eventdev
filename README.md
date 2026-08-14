@@ -55,13 +55,13 @@ os segredos estiverem ausentes, fracos ou forem iguais. Use
 
 ## Deploy da API na Vercel
 
-A Vercel detecta o NestJS diretamente pelo `apps/api/src/main.ts`. Crie um
-projeto separado para a API, apontando para o mesmo repositório, com estas
-configurações:
+A API possui uma Function Node explícita em `apps/api/api`, que inicializa o
+NestJS uma vez por instância. Crie um projeto separado para a API, apontando
+para o mesmo repositório, com estas configurações:
 
 - **Production Branch:** `main`
 - **Root Directory:** `apps/api`
-- **Framework Preset:** NestJS (detectado automaticamente)
+- **Framework Preset:** Other
 - **Build Command, Install Command e Output Directory:** padrões da Vercel
 - **Include source files outside of the Root Directory:** habilitado
 
@@ -77,11 +77,10 @@ RESERVATION_HOLD_MINUTES=10
 CORS_ORIGINS=https://<dominio-da-web>
 ```
 
-Não configure `PORT`: a Vercel injeta a porta em tempo de execução. As
-migrations devem ser aplicadas de forma controlada com `npm run db:migrate`, e
-não durante cada build. Após o primeiro deploy, teste `https://<api>/api` e
-configure na Web `NEXT_PUBLIC_API_URL=https://<api>/api`, fazendo um novo deploy
-do frontend.
+Não configure `PORT`: a Function não abre uma porta própria. As migrations
+devem ser aplicadas de forma controlada com `npm run db:migrate`, e não durante
+cada build. Após o primeiro deploy, teste `https://<api>/api` e configure na
+Web `NEXT_PUBLIC_API_URL=https://<api>/api`, fazendo um novo deploy do frontend.
 
 ## Execução sem Docker
 
