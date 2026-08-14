@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "rewrites": [
+    {
+      "source": "/api/:eventdevPath*",
+      "destination": "/api?__eventdev_path=:eventdevPath*"
+    }
+  ],
   "functions": {
     "api/**/*.ts": {
       "maxDuration": 60
