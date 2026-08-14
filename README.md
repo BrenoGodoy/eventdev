@@ -62,7 +62,8 @@ para o mesmo repositório, com estas configurações:
 - **Production Branch:** `main`
 - **Root Directory:** `apps/api`
 - **Framework Preset:** Other
-- **Build Command, Install Command e Output Directory:** padrões da Vercel
+- **Build Command e Install Command:** padrões da Vercel
+- **Output Directory:** `public` (já incluído em `apps/api/public`)
 - **Include source files outside of the Root Directory:** habilitado
 
 Configure as variáveis de ambiente do projeto da API:
