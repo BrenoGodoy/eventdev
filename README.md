@@ -53,6 +53,36 @@ A API carrega `apps/api/.env` na execução local. Em produção, ela falha cedo
 os segredos estiverem ausentes, fracos ou forem iguais. Use
 `apps/api/.env.example` e `apps/web/.env.local.example` como referência.
 
+## Deploy da API na Vercel
+
+A Vercel detecta o NestJS diretamente pelo `apps/api/src/main.ts`. Crie um
+projeto separado para a API, apontando para o mesmo repositório, com estas
+configurações:
+
+- **Production Branch:** `main`
+- **Root Directory:** `apps/api`
+- **Framework Preset:** NestJS (detectado automaticamente)
+- **Build Command, Install Command e Output Directory:** padrões da Vercel
+- **Include source files outside of the Root Directory:** habilitado
+
+Configure as variáveis de ambiente do projeto da API:
+
+```text
+NODE_ENV=production
+DATABASE_URL=<conexao-pooler-do-neon>
+JWT_SECRET=<segredo-aleatorio-com-32-ou-mais-caracteres>
+TICKET_SIGNING_SECRET=<outro-segredo-com-32-ou-mais-caracteres>
+TICKETMASTER_API_KEY=<consumer-key>
+RESERVATION_HOLD_MINUTES=10
+CORS_ORIGINS=https://<dominio-da-web>
+```
+
+Não configure `PORT`: a Vercel injeta a porta em tempo de execução. As
+migrations devem ser aplicadas de forma controlada com `npm run db:migrate`, e
+não durante cada build. Após o primeiro deploy, teste `https://<api>/api` e
+configure na Web `NEXT_PUBLIC_API_URL=https://<api>/api`, fazendo um novo deploy
+do frontend.
+
 ## Execução sem Docker
 
 Requisitos: Node.js 22+, npm 10+ e PostgreSQL 16+.
