@@ -191,16 +191,6 @@ export function CustomerHome({ session }: { session: AuthSession }) {
             eyebrow="Escolhas para voce"
             title="Eventos para viver"
           />
-          <CompactEventList
-            emptyText="Compre seu primeiro ingresso para receber sugestões da mesma região."
-            events={nearbyEvents}
-            eyebrow="Perto de voce"
-            title={
-              preferredState
-                ? `Mais eventos em ${preferredState}`
-                : "Descubra sua regiao"
-            }
-          />
         </div>
       </div>
     </section>

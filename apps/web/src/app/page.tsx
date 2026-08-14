@@ -34,14 +34,14 @@ export default function HomePage() {
           </div>
         </div>
         <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>Seu proximo evento comeca aqui</p>
+          <p className={styles.eyebrow}>Seu próximo evento começa aqui</p>
           <h1 id="home-title">
             Eventos para <span className={styles.violetWord}>viver</span>,
-            historias para <span className={styles.acidWord}>lembrar</span>.
+            histórias para <span className={styles.acidWord}>lembrar</span>.
           </h1>
           <p>
-            Descubra shows, festivais, cinema e experiencias que aproximam
-            pessoas. Da escolha do evento ate a entrada, tudo em uma so jornada.
+            Descubra shows, festivais e experiências que aproximam
+            pessoas. Da escolha do evento até a entrada, tudo em uma só jornada.
           </p>
           <div className={styles.heroActions}>
             <Link
