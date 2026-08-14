@@ -79,32 +79,6 @@ PostgreSQL
 
 ---
 
-## Cobertura dos requisitos
-
-| Requisito | Implementação |
-| --- | --- |
-| Navegação por eventos | Catálogo público com busca e filtros. |
-| Data, local e preço | Exibidos no catálogo e na página do evento. |
-| Gestão pelo organizador | Criação, edição, listagem de eventos próprios e cancelamento. |
-| Reserva | Seleção por quantidade nos setores **Pista** e **Pista Premium**. |
-| Pagamento aprovado e recusado | Checkout simulado com os dois cenários. |
-| Meus ingressos | Carteira com QR Code, setor, código público e status. |
-| Portaria | Validação por câmera ou código digitado. |
-| Retornos da portaria | Válido, inválido, já utilizado e evento errado. |
-| API externa | Ticketmaster Discovery API. |
-| Três perfis | `ORGANIZER`, `CUSTOMER` e `GATE`. |
-| Persistência | PostgreSQL + Prisma. |
-| Proteção contra overselling | Reservas e atualização de estoque protegidas por transações e operações condicionais. |
-| QR não forjável | Código público, nonce e assinatura HMAC. |
-| Compartilhamento | Link temporário com token armazenado somente como hash. |
-| Uso único | Validação altera o ingresso de `ACTIVE` para `USED` de forma condicional. |
-| Dados de teste | 1 organizador, 2 clientes, 1 portaria e 6 eventos publicados. |
-| Docker | Ambiente local completo com Docker Compose. |
-| Testes | Testes unitários e E2E da API. |
-| Deploy | Frontend e API na Vercel, PostgreSQL no Neon. |
-
----
-
 ## Principais fluxos
 
 ### Catálogo
