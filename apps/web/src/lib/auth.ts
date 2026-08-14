@@ -1,6 +1,6 @@
 import { apiBaseUrl } from "./api";
 
-export type UserRole = 'ORGANIZER' | 'CUSTOMER' | 'GATE';
+export type UserRole = "ORGANIZER" | "CUSTOMER" | "GATE";
 
 export type AuthUser = {
   id: string;
@@ -11,61 +11,60 @@ export type AuthUser = {
 
 export type AuthSession = {
   token: string;
-  tokenType: 'Bearer';
+  tokenType: "Bearer";
   expiresInSeconds: number;
   user: AuthUser;
 };
 
-export type DemoAccount = {
-  role: UserRole;
-  label: string;
-  email: string;
-  password: string;
-};
-
-export const demoAccounts: DemoAccount[] = [
-  {
-    role: 'ORGANIZER',
-    label: 'Organizador',
-    email: 'organizer@elite.dev',
-    password: 'Organizer123!',
-  },
-  {
-    role: 'CUSTOMER',
-    label: 'Cliente principal',
-    email: 'cliente@elite.dev',
-    password: 'Cliente123!',
-  },
-  {
-    role: 'CUSTOMER',
-    label: 'Cliente convidado',
-    email: 'cliente2@elite.dev',
-    password: 'Cliente2123!',
-  },
-  {
-    role: 'GATE',
-    label: 'Portaria',
-    email: 'portaria@elite.dev',
-    password: 'Portaria123!',
-  },
-];
-
-const STORAGE_KEY = 'eventdev.session';
+const STORAGE_KEY = "eventdev.session";
 
 export async function login(email: string, password: string) {
   const response = await fetch(`${apiBaseUrl}/auth/login`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ email, password }),
   });
 
   if (!response.ok) {
-    throw new Error('E-mail ou senha invalidos.');
+    throw new Error(
+      await readAuthError(response, "E-mail ou senha inválidos."),
+    );
   }
 
   return (await response.json()) as AuthSession;
+}
+
+export async function registerCustomer(
+  name: string,
+  email: string,
+  password: string,
+) {
+  const response = await fetch(`${apiBaseUrl}/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await readAuthError(response, "Não foi possível criar sua conta."),
+    );
+  }
+
+  return (await response.json()) as AuthSession;
+}
+
+async function readAuthError(response: Response, fallback: string) {
+  try {
+    const payload = (await response.json()) as { message?: string };
+    return payload.message || fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export function storeSession(session: AuthSession) {
@@ -73,7 +72,7 @@ export function storeSession(session: AuthSession) {
 }
 
 export function readSession(): AuthSession | null {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 

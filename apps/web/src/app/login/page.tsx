@@ -1,16 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, LockKeyhole, Mail } from "lucide-react";
 import { Brand } from "../../components/brand/Brand";
+import { EventTicket } from "../../components/event-ticket/EventTicket";
 import actions from "../../components/ui/Action.module.css";
-import { demoAccounts, login, storeSession } from "../../lib/auth";
+import { login, storeSession } from "../../lib/auth";
 import styles from "./page.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(demoAccounts[0].email);
-  const [password, setPassword] = useState(demoAccounts[0].password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,17 +38,11 @@ export default function LoginPage() {
       setError(
         loginError instanceof Error
           ? loginError.message
-          : "Nao foi possivel entrar.",
+          : "Não foi possível entrar.",
       );
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  function selectAccount(accountEmail: string, accountPassword: string) {
-    setEmail(accountEmail);
-    setPassword(accountPassword);
-    setError("");
   }
 
   return (
@@ -56,70 +53,46 @@ export default function LoginPage() {
           <p className={styles.eyebrow}>Bilheteria editorial</p>
           <h1 id="login-title">Entrar na plataforma</h1>
           <p>
-            Acesso seed para navegar pelos tres papeis do desafio: publicar,
-            comprar e validar ingressos.
+            Acesse sua jornada EventDev para descobrir eventos, gerenciar
+            experiências e validar ingressos.
           </p>
-        </div>
-        <div className={styles.ticket} aria-hidden="true">
-          <div className={styles.ticketDate}>
-            <span>Proxima sessao</span>
-            <strong>15 OUT</strong>
-          </div>
-          <div className={styles.ticketRoute}>
-            <span>FILME</span>
-            <span>SHOW</span>
-            <span>PORTARIA</span>
-          </div>
         </div>
       </section>
 
-      <section className={styles.panel} aria-label="Formulario de login">
+      <section className={styles.panel} aria-label="Formulário de login">
         <div className={styles.panelInner}>
           <div className={styles.panelHeading}>
-            <p className={styles.panelEyebrow}>Contas demo</p>
-            <h2>Escolha um papel</h2>
-            <p>Use uma das contas preparadas para acessar cada jornada.</p>
-          </div>
-
-          <div className={styles.accountGrid}>
-            {demoAccounts.map((account) => {
-              const isActive = email === account.email;
-
-              return (
-                <button
-                  aria-pressed={isActive}
-                  className={`${styles.accountCard} ${isActive ? styles.accountCardActive : ""}`}
-                  key={account.email}
-                  type="button"
-                  onClick={() =>
-                    selectAccount(account.email, account.password)
-                  }
-                >
-                  <span>{account.label}</span>
-                  <strong>{account.email}</strong>
-                </button>
-              );
-            })}
+            <p className={styles.panelEyebrow}>Acesse sua conta</p>
+            <h2>Bem-vindo de volta</h2>
+            <p>Entre com seu e-mail e senha para continuar.</p>
           </div>
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <label className={styles.field}>
               E-mail
-              <input
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                type="email"
-              />
+              <span className={styles.inputControl}>
+                <Mail aria-hidden="true" size={19} />
+                <input
+                  autoComplete="email"
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                  type="email"
+                  value={email}
+                />
+              </span>
             </label>
             <label className={styles.field}>
               Senha
-              <input
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                type="password"
-              />
+              <span className={styles.inputControl}>
+                <LockKeyhole aria-hidden="true" size={19} />
+                <input
+                  autoComplete="current-password"
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  type="password"
+                  value={password}
+                />
+              </span>
             </label>
 
             {error ? (
@@ -133,10 +106,21 @@ export default function LoginPage() {
               disabled={isSubmitting}
               type="submit"
             >
-              {isSubmitting ? "Entrando..." : "Entrar"}
+              <span>{isSubmitting ? "Entrando..." : "Entrar"}</span>
+              {!isSubmitting ? (
+                <ArrowRight aria-hidden="true" size={19} />
+              ) : null}
             </button>
+            <p className={styles.signupPrompt}>
+              Ainda não tem uma conta?{" "}
+              <Link href="/cadastro">Criar perfil</Link>
+            </p>
           </form>
         </div>
+      </section>
+
+      <section className={styles.ticketStage} aria-label="Evento em destaque">
+        <EventTicket />
       </section>
     </main>
   );

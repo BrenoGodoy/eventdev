@@ -1,13 +1,22 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/client';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthUser } from './auth-user';
 
 type LoginInput = {
   email?: unknown;
   password?: unknown;
+};
+
+type RegisterCustomerInput = LoginInput & {
+  name?: unknown;
 };
 
 type TokenPayload = {
@@ -33,10 +42,90 @@ export class AuthService {
     if (!user || !(await compare(password, user.passwordHash))) {
       throw new UnauthorizedException({
         code: 'INVALID_CREDENTIALS',
-        message: 'E-mail ou senha invalidos.',
+        message: 'E-mail ou senha inválidos.',
       });
     }
 
+    return this.createSession(user);
+  }
+
+  async registerCustomer(input: RegisterCustomerInput) {
+    const name = typeof input.name === 'string' ? input.name.trim() : '';
+    const email =
+      typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
+    const password = typeof input.password === 'string' ? input.password : '';
+
+    if (name.length < 2 || name.length > 80) {
+      throw new BadRequestException({
+        code: 'INVALID_NAME',
+        message: 'Informe um nome entre 2 e 80 caracteres.',
+      });
+    }
+
+    if (email.length > 160 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new BadRequestException({
+        code: 'INVALID_EMAIL',
+        message: 'Informe um e-mail válido.',
+      });
+    }
+
+    if (
+      password.length < 8 ||
+      password.length > 72 ||
+      !/[a-z]/.test(password) ||
+      !/[A-Z]/.test(password) ||
+      !/\d/.test(password)
+    ) {
+      throw new BadRequestException({
+        code: 'INVALID_PASSWORD',
+        message:
+          'A senha deve ter entre 8 e 72 caracteres, com letra maiúscula, minúscula e número.',
+      });
+    }
+
+    if (await this.prisma.user.findUnique({ where: { email } })) {
+      throw new ConflictException({
+        code: 'EMAIL_ALREADY_REGISTERED',
+        message: 'Este e-mail já está cadastrado.',
+      });
+    }
+
+    let user;
+
+    try {
+      user = await this.prisma.user.create({
+        data: {
+          name,
+          email,
+          passwordHash: await hash(password, 12),
+          role: UserRole.CUSTOMER,
+        },
+      });
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException({
+          code: 'EMAIL_ALREADY_REGISTERED',
+          message: 'Este e-mail já está cadastrado.',
+        });
+      }
+
+      throw error;
+    }
+
+    return this.createSession(user);
+  }
+
+  private async createSession(user: {
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+  }) {
     const publicUser = this.toPublicUser(user);
     const expiresInSeconds = 60 * 60 * 8;
     const token = await this.jwtService.signAsync(

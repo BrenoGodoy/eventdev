@@ -15,6 +15,14 @@ export class AuthController {
     return this.authService.login(body);
   }
 
+  @Public()
+  @Post('register')
+  register(
+    @Body() body: { name?: unknown; email?: unknown; password?: unknown },
+  ) {
+    return this.authService.registerCustomer(body);
+  }
+
   @Roles(UserRole.ORGANIZER, UserRole.CUSTOMER, UserRole.GATE)
   @Get('me')
   me(@Req() request: AuthenticatedRequest) {
