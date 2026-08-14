@@ -296,28 +296,6 @@ As referências de plataformas como Sympla, Ingresse, Eventim e Cheers foram uti
 | Frontend/API em produção | Vercel |
 | PostgreSQL em produção | Neon |
 
-### Por que monorepo
-
-O projeto utiliza **npm workspaces**.
-
-```text
-eventdev/
-├── apps/api
-└── apps/web
-```
-
-Para o tamanho do desafio, um monorepo reduz o custo operacional e facilita:
-
-- instalação das dependências;
-- execução do projeto;
-- Docker;
-- migrations;
-- versionamento;
-- testes;
-- entendimento das mudanças que atravessam frontend e backend.
-
-A intenção foi manter a infraestrutura simples, sem adicionar ferramentas que não trariam benefício significativo para o escopo.
-
 ---
 
 ## Arquitetura
@@ -697,8 +675,6 @@ Isso significa que uma indisponibilidade da API externa não impede:
 - transferência;
 - validação.
 
-Caso `TICKETMASTER_API_KEY` não esteja configurada, o ambiente de demonstração possui um catálogo local identificado na interface.
-
 ---
 
 ## Dados de demonstração
@@ -728,6 +704,8 @@ O ambiente possui seis eventos publicados inspirados em:
 - The Mission;
 - Pink Floyd;
 - Fleetwood Mac.
+
+(Bandas que eu gosto, espero que gostem também <3)
 
 Cada evento possui setores, preços, capacidade e estoque próprios.
 
@@ -783,16 +761,6 @@ Depois da inicialização:
 | Web | `http://localhost:3000` |
 | API | `http://localhost:3001/api` |
 | PostgreSQL | `postgresql://eventdev:eventdev@localhost:5432/eventdev` |
-
-Na primeira execução, a instalação das dependências dentro dos containers pode levar alguns minutos.
-
-Aguarde a inicialização da API e da Web antes de acessar o navegador.
-
-### Logs
-
-```bash
-docker compose logs -f web api
-```
 
 ### Encerrar
 
@@ -885,8 +853,6 @@ http://localhost:3000
 
 ## Variáveis de ambiente
 
-Não versione arquivos `.env`, `.env.local` ou segredos de produção.
-
 | Variável | Serviço | Obrigatória | Descrição |
 | --- | --- | --- | --- |
 | `DATABASE_URL` | API | Sim | Conexão PostgreSQL. |
@@ -978,126 +944,6 @@ PostgreSQL  → Neon
 ```
 
 Frontend e backend são projetos Vercel independentes apontando para o mesmo monorepo.
-
-### 1. PostgreSQL no Neon
-
-Crie um projeto no Neon e obtenha sua connection string PostgreSQL com SSL.
-
-Depois aplique as migrations:
-
-```bash
-DATABASE_URL="<connection-string-do-neon>" npm run db:migrate
-```
-
-O comando utiliza:
-
-```bash
-prisma migrate deploy
-```
-
-Não utilize:
-
-```bash
-prisma migrate dev
-```
-
-contra o banco de produção.
-
----
-
-### 2. API na Vercel
-
-Crie um projeto Vercel apontando para o mesmo repositório.
-
-Configuração:
-
-| Campo | Valor |
-| --- | --- |
-| Production Branch | `main` |
-| Root Directory | `apps/api` |
-| Framework Preset | `Other` |
-| Output Directory | `public` |
-| Include source files outside Root Directory | Habilitado |
-
-Variáveis:
-
-```env
-NODE_ENV=production
-
-DATABASE_URL=<connection-string-do-neon>
-
-JWT_SECRET=<segredo-aleatorio>
-
-TICKET_SIGNING_SECRET=<outro-segredo-aleatorio>
-
-TICKETMASTER_API_KEY=<consumer-key-opcional>
-
-RESERVATION_HOLD_MINUTES=10
-
-CORS_ORIGINS=https://<dominio-web>.vercel.app
-```
-
-Não configure `PORT` na Vercel.
-
-A entrada da aplicação está em:
-
-```text
-apps/api/api
-```
-
-e o `vercel.json` encaminha `/api/*` para o NestJS.
-
-Após o deploy:
-
-```text
-https://<dominio-api>.vercel.app/api/events
-```
-
-deve retornar o catálogo.
-
----
-
-### 3. Web na Vercel
-
-Crie um segundo projeto Vercel.
-
-| Campo | Valor |
-| --- | --- |
-| Production Branch | `main` |
-| Root Directory | `apps/web` |
-| Framework Preset | `Next.js` |
-| Build Command | Padrão |
-| Output Directory | Não configurar |
-
-Configure:
-
-```env
-NEXT_PUBLIC_API_URL=https://<dominio-api>.vercel.app/api
-```
-
-Como variáveis `NEXT_PUBLIC_*` são incorporadas ao build do Next.js, faça um novo deploy caso o endereço da API seja alterado.
-
-Depois, configure a URL final da Web em:
-
-```env
-CORS_ORIGINS=https://<dominio-web>.vercel.app
-```
-
-na API.
-
-### Verificação pós-deploy
-
-```bash
-curl -i https://<dominio-api>.vercel.app/api/events
-```
-
-```bash
-curl -i https://<dominio-api>.vercel.app/api/events/featured
-```
-
-O primeiro endpoint deve retornar o catálogo publicado.
-
-O segundo deve retornar somente os eventos em destaque.
 
 ---
 
@@ -1258,4 +1104,6 @@ Portaria
 Validação
 ```
 
-A prioridade foi garantir que esse fluxo funcionasse de ponta a ponta antes de adicionar funcionalidades secundárias, mantendo regras de domínio, segurança, integridade dos dados e organização técnica como partes centrais da solução.
+A prioridade foi garantir que esse fluxo funcionasse de ponta a ponta antes de adicionar funcionalidades secundárias.
+
+Espero que tenham gostado :)
