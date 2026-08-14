@@ -949,8 +949,6 @@ Frontend e backend são projetos Vercel independentes apontando para o mesmo mon
 
 ## Uso de IA
 
-O desafio permite e incentiva o uso transparente de inteligência artificial.
-
 Utilizei o **GPT-5.6** como ferramenta de pair programming durante o desenvolvimento.
 
 A IA foi utilizada principalmente para:
@@ -959,11 +957,10 @@ A IA foi utilizada principalmente para:
 - revisar código;
 - discutir regras de negócio;
 - auxiliar na integração entre frontend e backend;
-- gerar alternativas de microcopy;
 - apoiar a implementação de testes;
 - criar e refinar testes E2E;
-- revisar responsividade e composição de algumas telas;
-- auxiliar na identificação de casos de borda.
+- revisar responsividade e composição de telas;
+- Documentação
 
 ### Decisões que partiram de mim
 
@@ -972,7 +969,6 @@ Foram decisões minhas:
 - nome **EventDev**;
 - direção visual da aplicação;
 - utilização das cores da Verzel como referência contextual;
-- conceito do símbolo `ED`;
 - conceito do ticket na tela de login;
 - estrutura visual do catálogo;
 - escolha de CSS Modules;
@@ -999,7 +995,6 @@ O objetivo foi estudar padrões conhecidos de plataformas de eventos sem reprodu
 A IA teve participação mais direta em:
 
 - implementação e refinamento de CSS a partir das direções visuais que defini;
-- sugestões de microcopy;
 - revisão de regras de reserva e transferência;
 - apoio na proteção de estoque;
 - integração de fluxos entre as camadas;
