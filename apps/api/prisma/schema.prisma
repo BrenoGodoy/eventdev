@@ -70,16 +70,19 @@ enum GateCheckResult {
 }
 
 model User {
-  id              String        @id @default(cuid())
-  name            String
-  email           String        @unique
-  passwordHash    String
-  role            UserRole      @default(CUSTOMER)
-  organizedEvents Event[]       @relation("EventOrganizer")
-  reservations    Reservation[]
-  gateChecks      GateCheck[]   @relation("GateUserChecks")
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                  String        @id @default(cuid())
+  name                String
+  email               String        @unique
+  passwordHash        String
+  role                UserRole      @default(CUSTOMER)
+  organizedEvents     Event[]       @relation("EventOrganizer")
+  reservations        Reservation[]
+  ownedTickets        Ticket[]      @relation("TicketOwner")
+  createdShareTokens  ShareToken[]  @relation("ShareTokenCreator")
+  acceptedShareTokens ShareToken[]  @relation("ShareTokenRecipient")
+  gateChecks          GateCheck[]   @relation("GateUserChecks")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 }
 
 model Event {
@@ -201,6 +204,7 @@ model Ticket {
   id            String           @id @default(cuid())
   reservationId String
   eventId       String
+  ownerId       String
   tierId        String?
   seatId        String?          @unique
   publicCode    String           @unique
@@ -210,6 +214,7 @@ model Ticket {
   status        TicketStatus     @default(ACTIVE)
   reservation   Reservation      @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   event         Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  owner         User             @relation("TicketOwner", fields: [ownerId], references: [id], onDelete: Restrict)
   tier          EventTicketTier? @relation(fields: [tierId], references: [id], onDelete: Restrict)
   seat          EventSeat?       @relation(fields: [seatId], references: [id], onDelete: SetNull)
   gateChecks    GateCheck[]
@@ -219,6 +224,7 @@ model Ticket {
 
   @@index([reservationId])
   @@index([eventId])
+  @@index([ownerId])
   @@index([tierId])
 }
 
@@ -241,13 +247,21 @@ model GateCheck {
 }
 
 model ShareToken {
-  id        String    @id @default(cuid())
-  ticketId  String
-  tokenHash String    @unique
-  revokedAt DateTime?
-  expiresAt DateTime?
-  createdAt DateTime  @default(now())
-  ticket    Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  id           String    @id @default(cuid())
+  ticketId     String
+  createdById  String
+  acceptedById String?
+  tokenHash    String    @unique
+  revokedAt    DateTime?
+  consumedAt   DateTime?
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now())
+  ticket       Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdBy    User      @relation("ShareTokenCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  acceptedBy   User?     @relation("ShareTokenRecipient", fields: [acceptedById], references: [id], onDelete: Restrict)
 
   @@index([ticketId])
+  @@index([createdById])
+  @@index([acceptedById])
+  @@index([expiresAt])
 }

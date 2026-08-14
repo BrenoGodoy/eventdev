@@ -51,6 +51,25 @@ export type EventTicket = {
   } | null;
 };
 
+export type TicketShareLink = {
+  token: string;
+  expiresAt: string;
+  expiresInSeconds: number;
+  ticket: {
+    id: string;
+    eventTitle: string;
+  };
+};
+
+export type AcceptedTicketShare = {
+  transferred: true;
+  acceptedAt: string;
+  ticket: {
+    id: string;
+    eventTitle: string;
+  };
+};
+
 export function createReservation(
   eventId: string,
   items: Array<{ tierId: string; quantity: number }>,
@@ -104,6 +123,22 @@ export function fetchMyTickets(token: string, signal?: AbortSignal) {
     `${apiBaseUrl}/tickets/mine`,
     token,
     { signal },
+  );
+}
+
+export function createTicketShare(ticketId: string, token: string) {
+  return authenticatedRequest<TicketShareLink>(
+    `${apiBaseUrl}/tickets/${encodeURIComponent(ticketId)}/share`,
+    token,
+    { method: "POST" },
+  );
+}
+
+export function acceptTicketShare(shareToken: string, token: string) {
+  return authenticatedRequest<AcceptedTicketShare>(
+    `${apiBaseUrl}/tickets/shares/${encodeURIComponent(shareToken)}/accept`,
+    token,
+    { method: "POST" },
   );
 }
 

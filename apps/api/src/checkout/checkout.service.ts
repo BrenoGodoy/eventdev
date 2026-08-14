@@ -359,7 +359,12 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
       });
       const ticketsData = reservation.items.flatMap((item) =>
         Array.from({ length: item.quantity }, () =>
-          this.createTicketData(current.id, reservation.eventId, item.tierId),
+          this.createTicketData(
+            current.id,
+            reservation.eventId,
+            item.tierId,
+            user.id,
+          ),
         ),
       );
 
@@ -383,7 +388,8 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
   async findMyTickets(userId: string) {
     const tickets = await this.prisma.ticket.findMany({
       where: {
-        reservation: { userId, paymentStatus: PaymentStatus.PAID },
+        ownerId: userId,
+        reservation: { paymentStatus: PaymentStatus.PAID },
       },
       orderBy: { createdAt: 'desc' },
       select: ticketSelect,
@@ -493,6 +499,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
     reservationId: string,
     eventId: string,
     tierId: string,
+    ownerId: string,
   ) {
     const id = randomUUID();
     const publicCode = `ED-${randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase()}`;
@@ -509,6 +516,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
       id,
       reservationId,
       eventId,
+      ownerId,
       tierId,
       publicCode,
       nonce,

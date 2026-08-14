@@ -137,6 +137,129 @@
   letter-spacing: 0;
 }
 
+.shareArea {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.shareButton {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 900;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.shareButton:hover:not(:disabled) {
+  border-color: var(--color-violet);
+  color: var(--color-violet-dark);
+  transform: translateY(-1px);
+}
+
+.shareButton svg {
+  color: var(--color-violet);
+}
+
+.shareError {
+  color: var(--color-danger);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.sharePanel {
+  display: grid;
+  width: 100%;
+  gap: 0.65rem;
+  border-top: 1px solid var(--color-line);
+  padding-top: 0.85rem;
+}
+
+.shareHeading {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+.shareHeading > svg {
+  flex: 0 0 auto;
+  color: var(--color-success);
+}
+
+.shareHeading span {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.shareHeading strong {
+  color: var(--color-ink);
+  font-size: 0.78rem;
+}
+
+.shareLinkRow {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) 2.75rem;
+}
+
+.shareLinkRow input {
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 1px solid var(--color-line);
+  border-right: 0;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  outline: 0;
+  background: var(--color-paper);
+  color: var(--color-text-muted);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.72rem;
+}
+
+.shareLinkRow input:focus {
+  border-color: var(--color-violet);
+  box-shadow: var(--shadow-focus);
+}
+
+.shareLinkRow button {
+  display: grid;
+  place-items: center;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-violet);
+  color: var(--color-surface);
+}
+
+.shareLinkRow button:hover {
+  background: var(--color-violet-dark);
+}
+
+.transferWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.transferWarning svg {
+  flex: 0 0 auto;
+  margin-top: 0.05rem;
+  color: var(--color-violet);
+}
+
 .qrArea {
   display: grid;
   place-content: center;
@@ -223,5 +346,14 @@
   .qrArea {
     grid-column: auto;
     grid-template-columns: 1fr;
+  }
+
+  .shareArea,
+  .shareButton {
+    width: 100%;
+  }
+
+  .shareButton {
+    justify-content: center;
   }
 }

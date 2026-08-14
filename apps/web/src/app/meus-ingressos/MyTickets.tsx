@@ -7,14 +7,23 @@ import { useEffect, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
+  Check,
+  Clock3,
+  Copy,
   MapPin,
+  Share2,
+  ShieldAlert,
   ShieldCheck,
   Ticket as TicketIcon,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { SiteHeader } from "../../components/site-header/SiteHeader";
 import actions from "../../components/ui/Action.module.css";
-import { EventTicket, fetchMyTickets } from "../../lib/checkout";
+import {
+  createTicketShare,
+  EventTicket,
+  fetchMyTickets,
+} from "../../lib/checkout";
 import { formatEventDate, formatEventTime } from "../../lib/events";
 import { useAuthSession } from "../../lib/use-auth-session";
 import styles from "./page.module.css";
@@ -26,7 +35,63 @@ export function MyTickets() {
   const [tickets, setTickets] = useState<EventTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sharingTicketId, setSharingTicketId] = useState<string | null>(null);
+  const [copiedTicketId, setCopiedTicketId] = useState<string | null>(null);
+  const [shareError, setShareError] = useState<{
+    ticketId: string;
+    message: string;
+  } | null>(null);
+  const [shareLink, setShareLink] = useState<{
+    ticketId: string;
+    url: string;
+    expiresAt: string;
+  } | null>(null);
   const purchaseCompleted = searchParams.get("compra") === "1";
+  const transferCompleted = searchParams.get("transferencia") === "1";
+
+  async function handleCreateShare(ticket: EventTicket) {
+    if (!session) {
+      return;
+    }
+
+    setSharingTicketId(ticket.id);
+    setCopiedTicketId(null);
+    setShareError(null);
+
+    try {
+      const response = await createTicketShare(ticket.id, session.token);
+      setShareLink({
+        ticketId: ticket.id,
+        url: new URL(
+          `/compartilhar/${response.token}`,
+          window.location.origin,
+        ).toString(),
+        expiresAt: response.expiresAt,
+      });
+    } catch (requestError) {
+      setShareError({
+        ticketId: ticket.id,
+        message:
+          requestError instanceof Error
+            ? requestError.message
+            : "Não foi possível gerar o link.",
+      });
+    } finally {
+      setSharingTicketId(null);
+    }
+  }
+
+  async function handleCopyShare(ticketId: string, url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedTicketId(ticketId);
+    } catch {
+      setShareError({
+        ticketId,
+        message: "Não foi possível copiar. Selecione o link manualmente.",
+      });
+    }
+  }
 
   useEffect(() => {
     if (!isReady) {
@@ -101,10 +166,12 @@ export function MyTickets() {
           </Link>
         </div>
 
-        {purchaseCompleted && (
+        {(purchaseCompleted || transferCompleted) && (
           <div className={styles.success} role="status">
             <CheckCircle2 aria-hidden="true" size={21} />
-            Pagamento aprovado. Seus ingressos foram emitidos.
+            {transferCompleted
+              ? "Transferência concluída. O ingresso já está na sua carteira."
+              : "Pagamento aprovado. Seus ingressos foram emitidos."}
           </div>
         )}
 
@@ -158,6 +225,71 @@ export function MyTickets() {
                     <span>Codigo do ingresso</span>
                     <strong>{ticket.publicCode}</strong>
                   </div>
+
+                  {ticket.status === "ACTIVE" && !ticket.usedAt ? (
+                    <div className={styles.shareArea}>
+                      <button
+                        className={styles.shareButton}
+                        disabled={sharingTicketId === ticket.id}
+                        onClick={() => handleCreateShare(ticket)}
+                        type="button"
+                      >
+                        <Share2 aria-hidden="true" size={17} />
+                        {sharingTicketId === ticket.id
+                          ? "Gerando link..."
+                          : "Compartilhar ingresso"}
+                      </button>
+
+                      {shareError?.ticketId === ticket.id ? (
+                        <p className={styles.shareError} role="alert">
+                          {shareError.message}
+                        </p>
+                      ) : null}
+
+                      {shareLink?.ticketId === ticket.id ? (
+                        <div className={styles.sharePanel} role="status">
+                          <div className={styles.shareHeading}>
+                            <Clock3 aria-hidden="true" size={17} />
+                            <span>
+                              <strong>Link válido por 30 minutos</strong>
+                              Expira às{" "}
+                              {new Intl.DateTimeFormat("pt-BR", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }).format(new Date(shareLink.expiresAt))}
+                            </span>
+                          </div>
+                          <div className={styles.shareLinkRow}>
+                            <input
+                              aria-label="Link de compartilhamento"
+                              onFocus={(event) => event.currentTarget.select()}
+                              readOnly
+                              value={shareLink.url}
+                            />
+                            <button
+                              aria-label="Copiar link"
+                              onClick={() =>
+                                handleCopyShare(ticket.id, shareLink.url)
+                              }
+                              title="Copiar link"
+                              type="button"
+                            >
+                              {copiedTicketId === ticket.id ? (
+                                <Check aria-hidden="true" size={18} />
+                              ) : (
+                                <Copy aria-hidden="true" size={18} />
+                              )}
+                            </button>
+                          </div>
+                          <p className={styles.transferWarning}>
+                            <ShieldAlert aria-hidden="true" size={16} />
+                            Quando a outra pessoa aceitar, este ingresso sairá
+                            da sua carteira e o QR atual será invalidado.
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
                 <div className={styles.qrArea}>
                   <QRCodeSVG

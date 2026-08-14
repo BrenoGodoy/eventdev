@@ -104,6 +104,23 @@ Rotas do cliente:
 - `/eventos/:slug/checkout`: selecao, reserva e pagamento simulado.
 - `/meus-ingressos`: carteira com os QRs assinados do cliente autenticado.
 
+### Compartilhamento de ingresso
+
+Na carteira, o titular pode gerar um link de transferência válido por 30
+minutos. O token bruto aparece somente no link; o banco armazena seu hash
+SHA-256. O destinatário precisa entrar com uma conta de cliente e o primeiro
+aceite válido transfere o ingresso em uma transação atômica.
+
+Depois da transferência, o ingresso sai da carteira anterior e recebe novo
+QR, código público, nonce e assinatura. Links anteriores são revogados e não
+podem ser reutilizados.
+
+Rotas protegidas de compartilhamento:
+
+- `POST /api/tickets/:ticketId/share`: gera um link para o titular atual.
+- `POST /api/tickets/shares/:token/accept`: aceita o link e transfere o ingresso.
+- `/compartilhar/:token`: conclui o aceite após a autenticação do destinatário.
+
 ## Portaria
 
 O perfil de portaria acessa `/portaria`, seleciona o evento em operacao e pode
