@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -62,6 +62,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
   const [error, setError] = useState("");
   const [paymentMessage, setPaymentMessage] = useState("");
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const expirationSyncAttemptedFor = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isReady) {
@@ -107,10 +108,10 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
 
         setError(
           requestError instanceof EventNotFoundError
-            ? "Evento nao encontrado."
+            ? "Evento não encontrado."
             : requestError instanceof Error
               ? requestError.message
-              : "Nao foi possivel preparar a reserva.",
+              : "Não foi possível preparar a reserva.",
         );
       })
       .finally(() => {
@@ -142,6 +143,29 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
     const timer = window.setInterval(updateRemaining, 1000);
     return () => window.clearInterval(timer);
   }, [reservation?.expiresAt, reservation?.status]);
+
+  useEffect(() => {
+    if (
+      remainingSeconds !== 0 ||
+      !reservation ||
+      reservation.status !== "PENDING" ||
+      !session ||
+      expirationSyncAttemptedFor.current === reservation.id
+    ) {
+      return;
+    }
+
+    expirationSyncAttemptedFor.current = reservation.id;
+    fetchReservation(reservation.id, session.token)
+      .then((response) => setReservation(response.reservation))
+      .catch((requestError: unknown) => {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Não foi possível atualizar a reserva expirada.",
+        );
+      });
+  }, [remainingSeconds, reservation, session]);
 
   const selectedQuantity = useMemo(
     () =>
@@ -223,7 +247,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
       setError(
         requestError instanceof Error
           ? requestError.message
-          : "Nao foi possivel reservar os ingressos.",
+          : "Não foi possível reservar os ingressos.",
       );
     } finally {
       setIsSubmitting(false);
@@ -257,13 +281,13 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
       }
 
       setPaymentMessage(
-        "Pagamento recusado. Nenhuma cobranca foi feita e sua reserva continua ativa.",
+        "Pagamento recusado. Nenhuma cobrança foi feita e sua reserva continua ativa.",
       );
     } catch (requestError) {
       setError(
         requestError instanceof Error
           ? requestError.message
-          : "Nao foi possivel processar o pagamento.",
+          : "Não foi possível processar o pagamento.",
       );
     } finally {
       setIsSubmitting(false);
@@ -294,6 +318,10 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
     return null;
   }
 
+  const isConfirmed =
+    reservation?.status === "CONFIRMED" ||
+    reservation?.paymentStatus === "PAID";
+  const isCanceled = reservation?.status === "CANCELED";
   const isExpired = reservation?.status === "EXPIRED" || remainingSeconds === 0;
   const minutes = Math.floor((remainingSeconds ?? 0) / 60);
   const seconds = (remainingSeconds ?? 0) % 60;
@@ -344,7 +372,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
                   <Ticket aria-hidden="true" size={21} />
                   <div>
                     <p className={styles.eyebrow}>Entrada por quantidade</p>
-                    <h2 id="tiers-title">Setores disponiveis</h2>
+                    <h2 id="tiers-title">Setores disponíveis</h2>
                   </div>
                 </div>
 
@@ -361,7 +389,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
                             <div>
                               <span>
                                 {tier.type === "PREMIUM"
-                                  ? "Experiencia premium"
+                                  ? "Experiência premium"
                                   : "Entrada geral"}
                               </span>
                               <h3>{tier.name}</h3>
@@ -372,7 +400,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
                           <small>
                             {soldOut
                               ? "Esgotado"
-                              : `${tier.availableQuantity} disponiveis`}
+                              : `${tier.availableQuantity} disponíveis`}
                           </small>
                         </div>
                         <div
@@ -429,13 +457,44 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
                   </button>
                 </div>
               </section>
+            ) : isConfirmed ? (
+              <section className={styles.expired}>
+                <CheckCircle2 aria-hidden="true" size={34} />
+                <h2>Compra já confirmada</h2>
+                <p>
+                  O pagamento desta reserva foi aprovado e os ingressos já
+                  estão disponíveis na sua conta.
+                </p>
+                <Link
+                  className={`${actions.action} ${actions.primary}`}
+                  href="/meus-ingressos"
+                >
+                  Ver meus ingressos
+                </Link>
+              </section>
+            ) : isCanceled ? (
+              <section className={styles.expired}>
+                <AlertCircle aria-hidden="true" size={34} />
+                <h2>Reserva cancelada</h2>
+                <p>
+                  Esta reserva não aceita novas tentativas de pagamento. Você
+                  pode voltar ao catálogo para escolher outro evento.
+                </p>
+                <Link
+                  className={`${actions.action} ${actions.primary}`}
+                  href="/eventos"
+                >
+                  Explorar eventos
+                </Link>
+              </section>
             ) : isExpired ? (
               <section className={styles.expired}>
                 <Clock3 aria-hidden="true" size={34} />
                 <h2>Reserva expirada</h2>
                 <p>
-                  Os ingressos voltaram ao estoque para evitar bloqueios
-                  indevidos.
+                  {reservation.status === "EXPIRED"
+                    ? "Os ingressos voltaram ao estoque para evitar bloqueios indevidos."
+                    : "O prazo terminou. Estamos liberando os ingressos para o estoque."}
                 </p>
                 <Link
                   className={`${actions.action} ${actions.primary}`}
@@ -451,7 +510,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
                     <CreditCard aria-hidden="true" size={21} />
                     <div>
                       <p className={styles.eyebrow}>Pagamento simulado</p>
-                      <h2>Dados do cartao</h2>
+                      <h2>Dados do cartão</h2>
                     </div>
                   </div>
                   <div className={styles.timer} role="timer">
@@ -473,7 +532,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
 
                 <div className={styles.paymentFields}>
                   <label className={`${styles.field} ${styles.fullField}`}>
-                    <span>Nome no cartao</span>
+                    <span>Nome no cartão</span>
                     <input
                       autoComplete="cc-name"
                       defaultValue={session.user.name}
@@ -481,7 +540,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
                     />
                   </label>
                   <label className={`${styles.field} ${styles.fullField}`}>
-                    <span>Numero do cartao</span>
+                    <span>Número do cartão</span>
                     <div className={styles.iconInput}>
                       <CreditCard aria-hidden="true" size={18} />
                       <input
@@ -512,7 +571,7 @@ export function CheckoutFlow({ slug }: CheckoutFlowProps) {
                 </div>
 
                 <fieldset className={styles.scenarios}>
-                  <legend>Resultado da simulacao</legend>
+                  <legend>Resultado da simulação</legend>
                   <label
                     className={
                       paymentScenario === "APPROVED"

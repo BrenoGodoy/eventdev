@@ -8,6 +8,10 @@
   text-decoration: none;
 }
 
+.staticContent {
+  display: block;
+}
+
 .link:focus-visible {
   border-radius: var(--radius-md);
   outline: 3px solid var(--color-violet);
@@ -100,7 +104,7 @@
 .meta svg {
   flex: 0 0 auto;
   margin-top: 0.1rem;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .inventory {
@@ -113,6 +117,14 @@
 
 .inventory svg {
   color: var(--color-success);
+}
+
+.actions {
+  display: flex;
+  gap: 0.55rem;
+  border-top: 1px solid var(--color-line);
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
 }
 
 @media (max-width: 560px) {

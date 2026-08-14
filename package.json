@@ -13,7 +13,12 @@
     "dev:api": "npm run start:dev --workspace=api",
     "build:web": "npm run build --workspace=web",
     "build:api": "npm run build --workspace=api",
+    "build": "npm run build:api && npm run build:web",
+    "lint": "npm run lint --workspace=api && npm run lint --workspace=web",
+    "test": "npm test --workspace=api -- --runInBand --no-watchman",
+    "test:e2e": "npm run test:e2e --workspace=api -- --runInBand --no-watchman",
     "docker:dev": "docker compose up --build",
+    "docker:down": "docker compose down",
     "db:migrate": "npm run prisma:migrate --workspace=api",
     "prisma:generate": "npm run prisma:generate --workspace=api"
   },

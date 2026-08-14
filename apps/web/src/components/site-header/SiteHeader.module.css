@@ -49,7 +49,7 @@
 }
 
 .searchForm:focus-within {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
@@ -86,7 +86,7 @@
   align-self: stretch;
   align-items: center;
   justify-content: center;
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
   color: var(--color-surface);
   padding: 0 1rem;
   font-size: 0.82rem;
@@ -113,7 +113,7 @@
 }
 
 .eventsLink svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .organizerNav {
@@ -216,7 +216,7 @@
 }
 
 .logoutButton:hover {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   color: var(--color-violet-dark);
 }
 

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { demoAttractions } from './demo-attractions';
 import { TicketmasterService } from './ticketmaster.service';
 
@@ -34,7 +38,7 @@ export class CatalogService {
       ),
       source: 'DEMO' as const,
       notice:
-        'TICKETMASTER_API_KEY ausente. Catalogo local de desenvolvimento ativo.',
+        'TICKETMASTER_API_KEY ausente. Catálogo local de desenvolvimento ativo.',
     };
   }
 
@@ -48,7 +52,7 @@ export class CatalogService {
     );
 
     if (!attraction) {
-      throw new NotFoundException('Atracao nao encontrada no catalogo.');
+      throw new NotFoundException('Atração não encontrada no catálogo.');
     }
 
     return attraction;

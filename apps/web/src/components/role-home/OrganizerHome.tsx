@@ -99,12 +99,12 @@ export function OrganizerHome({ session }: { session: AuthSession }) {
             <h3>
               {publishedEvents.length
                 ? `${publishedEvents.length} eventos publicados`
-                : "Seu primeiro evento esta a uma busca de distancia."}
+                : "Seu primeiro evento está a uma busca de distância."}
             </h3>
             <p>
               {publishedEvents.length
-                ? `${integerFormatter.format(allocated)} ingressos ja estao alocados da capacidade publicada.`
-                : "Busque uma atracao, complete os dados da producao e publique no catalogo."}
+                ? `${integerFormatter.format(allocated)} ingressos já estão alocados da capacidade publicada.`
+                : "Busque uma atração, complete os dados da produção e publique no catálogo."}
             </p>
             <div className={styles.leadActions}>
               <Link
@@ -137,7 +137,7 @@ export function OrganizerHome({ session }: { session: AuthSession }) {
             <Metric
               dark
               icon={Users}
-              label="Ocupacao atual"
+              label="Ocupação atual"
               value={`${occupancy}%`}
             />
           </div>
@@ -145,7 +145,7 @@ export function OrganizerHome({ session }: { session: AuthSession }) {
 
         <div className={styles.operationsGrid}>
           <section className={styles.listBlock}>
-            <BlockHeading eyebrow="Agenda" title="Proximos eventos" />
+            <BlockHeading eyebrow="Agenda" title="Próximos eventos" />
             {upcomingEvents.length ? (
               <div className={styles.operationList}>
                 {upcomingEvents.slice(0, 4).map((event) => (

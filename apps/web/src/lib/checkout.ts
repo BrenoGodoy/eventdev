@@ -1,4 +1,5 @@
 import { apiBaseUrl } from "./api";
+import { expireSession } from "./auth";
 
 export type ReservationItem = {
   id?: string;
@@ -157,13 +158,16 @@ async function authenticatedRequest<T>(
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      expireSession();
+    }
     const body = (await response.json().catch(() => null)) as {
       message?: string | string[];
     } | null;
     const message = Array.isArray(body?.message)
       ? body.message.join(" ")
       : body?.message;
-    throw new Error(message || "Nao foi possivel concluir a solicitacao.");
+    throw new Error(message || "Não foi possível concluir a solicitação.");
   }
 
   return (await response.json()) as T;

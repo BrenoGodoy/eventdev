@@ -8,8 +8,10 @@ describe('EventsService', () => {
   const findMany = jest.fn();
   const findFirst = jest.fn();
   const create = jest.fn();
+  const transaction = jest.fn();
   const prisma = {
     event: { create, findFirst, findMany },
+    $transaction: transaction,
   } as unknown as PrismaService;
   const findAttraction = jest.fn();
   const catalogService = { findAttraction } as unknown as CatalogService;
@@ -21,6 +23,7 @@ describe('EventsService', () => {
     findFirst.mockReset();
     findFirst.mockResolvedValue(null);
     create.mockReset();
+    transaction.mockReset();
     findAttraction.mockReset();
     findAttraction.mockResolvedValue({
       provider: 'TICKETMASTER',
@@ -28,7 +31,7 @@ describe('EventsService', () => {
       name: 'Coldplay',
       imageUrl: '/events/aurora-live.png',
       imageAlt: 'Imagem de Coldplay',
-      category: 'Musica',
+      category: 'Música',
       genre: 'Rock',
       subGenre: 'Alternative Rock',
       sourceUrl: null,
@@ -42,11 +45,12 @@ describe('EventsService', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
+        where: expect.objectContaining({
           status: EventStatus.PUBLISHED,
           state: 'SP',
           price: { lte: 100 },
-        },
+          date: { gt: expect.any(Date) },
+        }),
       }),
     );
   });
@@ -59,8 +63,8 @@ describe('EventsService', () => {
         where: {
           status: EventStatus.PUBLISHED,
           date: {
-            gte: new Date('2026-11-08T00:00:00.000Z'),
-            lt: new Date('2026-11-09T00:00:00.000Z'),
+            gte: new Date('2026-11-08T03:00:00.000Z'),
+            lt: new Date('2026-11-09T03:00:00.000Z'),
           },
         },
       }),
@@ -79,10 +83,11 @@ describe('EventsService', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
+        where: expect.objectContaining({
           featured: true,
           status: EventStatus.PUBLISHED,
-        },
+          date: { gt: expect.any(Date) },
+        }),
         orderBy: [{ featuredOrder: 'asc' }, { date: 'asc' }],
       }),
     );
@@ -94,10 +99,10 @@ describe('EventsService', () => {
       slug: 'aurora-live-sessions',
       title: 'Aurora Live Sessions',
       description: '**Uma noite especial.**',
-      category: 'Musica',
+      category: 'Música',
       date: new Date('2026-09-19T22:00:00.000Z'),
       venue: 'Casa Aurora',
-      city: 'Sao Paulo',
+      city: 'São Paulo',
       state: 'SP',
       imageUrl: '/events/aurora-live.png',
       imageAlt: 'Palco do evento Aurora Live Sessions',
@@ -128,10 +133,11 @@ describe('EventsService', () => {
 
     expect(findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
+        where: expect.objectContaining({
           slug: 'aurora-live-sessions',
           status: EventStatus.PUBLISHED,
-        },
+          date: { gt: expect.any(Date) },
+        }),
       }),
     );
     expect(result.event).toEqual(
@@ -170,11 +176,11 @@ describe('EventsService', () => {
         {
           externalId: 'demo-coldplay',
           title: 'Coldplay no Brasil',
-          description: 'Descricao completa do evento.',
+          description: 'Descrição completa do evento.',
           category: 'Rock',
           date: '2099-09-20T22:00:00.000Z',
           venue: 'Arena EventDev',
-          city: 'Sao Paulo',
+          city: 'São Paulo',
           state: 'SP',
           price: 250,
           capacity: 100,
@@ -190,11 +196,11 @@ describe('EventsService', () => {
       id: 'event-1',
       slug: 'coldplay-no-brasil-12345678',
       title: 'Coldplay no Brasil',
-      description: 'Descricao completa do evento.',
+      description: 'Descrição completa do evento.',
       category: 'Rock',
       date: new Date('2099-09-20T22:00:00.000Z'),
       venue: 'Arena EventDev',
-      city: 'Sao Paulo',
+      city: 'São Paulo',
       state: 'SP',
       imageUrl: '/events/aurora-live.png',
       imageAlt: 'Imagem de Coldplay',
@@ -221,11 +227,11 @@ describe('EventsService', () => {
       {
         externalId: 'demo-coldplay',
         title: 'Coldplay no Brasil',
-        description: 'Descricao completa do evento.',
+        description: 'Descrição completa do evento.',
         category: 'Rock',
         date: '2099-09-20T22:00:00.000Z',
         venue: 'Arena EventDev',
-        city: 'Sao Paulo',
+        city: 'São Paulo',
         state: 'SP',
         price: 250,
         capacity: 100,
@@ -267,11 +273,11 @@ describe('EventsService', () => {
       id: 'event-2',
       slug: 'evento-parcial-12345678',
       title: 'Evento parcial',
-      description: 'Descricao completa do evento.',
+      description: 'Descrição completa do evento.',
       category: 'Show',
       date: new Date('2099-09-20T22:00:00.000Z'),
       venue: 'Arena EventDev',
-      city: 'Sao Paulo',
+      city: 'São Paulo',
       state: 'SP',
       imageUrl: '/events/aurora-live.png',
       imageAlt: 'Imagem do evento',
@@ -298,11 +304,11 @@ describe('EventsService', () => {
       {
         externalId: 'demo-coldplay',
         title: 'Evento parcial',
-        description: 'Descricao completa do evento.',
+        description: 'Descrição completa do evento.',
         category: 'Show',
         date: '2099-09-20T22:00:00.000Z',
         venue: 'Arena EventDev',
-        city: 'Sao Paulo',
+        city: 'São Paulo',
         state: 'SP',
         price: 100,
         capacity: 100,
@@ -328,6 +334,110 @@ describe('EventsService', () => {
             ],
           },
         }),
+      }),
+    );
+  });
+
+  it('does not reduce capacity below inventory already committed by reservations', async () => {
+    transaction.mockImplementation((callback) =>
+      callback({
+        event: {
+          findFirst: jest.fn().mockResolvedValue({
+            id: 'event-1',
+            status: EventStatus.PUBLISHED,
+            ticketTiers: [
+              { id: 'tier-general', type: 'GENERAL' },
+              { id: 'tier-premium', type: 'PREMIUM' },
+            ],
+          }),
+        },
+        reservationItem: {
+          groupBy: jest.fn().mockResolvedValue([
+            { tierId: 'tier-general', _sum: { quantity: 8 } },
+            { tierId: 'tier-premium', _sum: { quantity: 3 } },
+          ]),
+        },
+      }),
+    );
+
+    await expect(
+      service.updateForOrganizer('organizer-1', 'event-1', {
+        title: 'Evento atualizado',
+        description: 'Descrição completa do evento atualizado.',
+        category: 'Show',
+        date: '2099-09-20T22:00:00.000Z',
+        venue: 'Arena EventDev',
+        city: 'São Paulo',
+        state: 'SP',
+        price: 100,
+        capacity: 10,
+        availableQuantity: 0,
+      }),
+    ).rejects.toThrow('11 ingressos reservados ou vendidos');
+  });
+
+  it('cancels the event and all active operational records atomically', async () => {
+    const updateEvent = jest.fn().mockResolvedValue({});
+    const updateTickets = jest.fn().mockResolvedValue({ count: 2 });
+    const updateReservations = jest.fn().mockResolvedValue({ count: 1 });
+    const updateShares = jest.fn().mockResolvedValue({ count: 1 });
+    const updateTiers = jest.fn().mockResolvedValue({ count: 2 });
+    const canceledEvent = {
+      id: 'event-1',
+      slug: 'evento-cancelado',
+      title: 'Evento cancelado',
+      description: 'Descrição completa do evento.',
+      category: 'Show',
+      date: new Date('2099-09-20T22:00:00.000Z'),
+      venue: 'Arena EventDev',
+      city: 'São Paulo',
+      state: 'SP',
+      imageUrl: '/events/aurora-live.png',
+      imageAlt: 'Imagem do evento',
+      catalogProvider: 'TICKETMASTER',
+      catalogExternalId: 'demo-coldplay',
+      mode: 'IN_PERSON',
+      price: { toString: () => '100' },
+      capacity: 100,
+      availableQuantity: 0,
+      featured: false,
+      featuredOrder: null,
+      status: EventStatus.CANCELED,
+      createdAt: new Date('2026-08-13T12:00:00.000Z'),
+      ticketTiers: [],
+    };
+
+    transaction.mockImplementation((callback) =>
+      callback({
+        event: {
+          findFirst: jest.fn().mockResolvedValue({
+            id: 'event-1',
+            status: EventStatus.PUBLISHED,
+          }),
+          update: updateEvent,
+          findUniqueOrThrow: jest.fn().mockResolvedValue(canceledEvent),
+        },
+        shareToken: { updateMany: updateShares },
+        ticket: { updateMany: updateTickets },
+        reservation: { updateMany: updateReservations },
+        eventTicketTier: { updateMany: updateTiers },
+      }),
+    );
+
+    const result = await service.cancelForOrganizer('organizer-1', 'event-1');
+
+    expect(result.event.status).toBe(EventStatus.CANCELED);
+    expect(updateShares).toHaveBeenCalledTimes(1);
+    expect(updateTickets).toHaveBeenCalledTimes(1);
+    expect(updateReservations).toHaveBeenCalledTimes(2);
+    expect(updateTiers).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { active: false, availableQuantity: 0 },
+      }),
+    );
+    expect(updateEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: EventStatus.CANCELED }),
       }),
     );
   });

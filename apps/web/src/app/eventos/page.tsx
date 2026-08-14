@@ -7,7 +7,7 @@ export default function EventsPage() {
     <Suspense
       fallback={
         <main className={styles.page}>
-          <div className={styles.pageLoading}>Carregando catalogo...</div>
+          <div className={styles.pageLoading}>Carregando catálogo...</div>
         </main>
       }
     >

@@ -29,10 +29,10 @@ export function PublicHome() {
           <div className={styles.overviewCopy}>
             <p className={styles.darkEyebrow}>Continue explorando</p>
             <h2 id="public-home-title">Encontre um evento com a sua energia.</h2>
-            <p>Veja as proximas datas ou entre para acessar sua area EventDev.</p>
+            <p>Veja as próximas datas ou entre para acessar sua área EventDev.</p>
             <div className={styles.leadActions}>
               <Link className={styles.acidAction} href="/eventos">
-                Ver catalogo <ArrowRight aria-hidden="true" size={18} />
+                Ver catálogo <ArrowRight aria-hidden="true" size={18} />
               </Link>
               <Link className={styles.darkSecondaryAction} href="/login">
                 Entrar

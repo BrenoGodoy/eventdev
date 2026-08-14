@@ -53,7 +53,9 @@ export class TicketmasterService {
 
     return (response._embedded?.attractions ?? [])
       .map((attraction) => this.normalize(attraction))
-      .filter((attraction): attraction is CatalogAttraction => Boolean(attraction));
+      .filter((attraction): attraction is CatalogAttraction =>
+        Boolean(attraction),
+      );
   }
 
   async findAttraction(externalId: string) {
@@ -64,7 +66,7 @@ export class TicketmasterService {
 
     if (!attraction) {
       throw new ServiceUnavailableException(
-        'A Ticketmaster retornou uma atracao incompleta.',
+        'A Ticketmaster retornou uma atração incompleta.',
       );
     }
 
@@ -76,7 +78,7 @@ export class TicketmasterService {
 
     if (!apiKey) {
       throw new ServiceUnavailableException(
-        'TICKETMASTER_API_KEY nao foi configurada.',
+        'TICKETMASTER_API_KEY não foi configurada.',
       );
     }
 
@@ -93,7 +95,9 @@ export class TicketmasterService {
       });
 
       if (!response.ok) {
-        throw new Error(`Ticketmaster respondeu com status ${response.status}.`);
+        throw new Error(
+          `Ticketmaster respondeu com status ${response.status}.`,
+        );
       }
 
       return (await response.json()) as T;
@@ -101,7 +105,7 @@ export class TicketmasterService {
       const message =
         error instanceof Error ? error.message : 'Falha desconhecida.';
       throw new ServiceUnavailableException(
-        `Nao foi possivel consultar a Ticketmaster. ${message}`,
+        `Não foi possível consultar a Ticketmaster. ${message}`,
       );
     }
   }
@@ -126,7 +130,7 @@ export class TicketmasterService {
       externalId: attraction.id,
       name: attraction.name,
       imageUrl: image?.url ?? '/events/horizonte-conference.png',
-      imageAlt: `Imagem oficial de ${attraction.name} no catalogo Ticketmaster`,
+      imageAlt: `Imagem oficial de ${attraction.name} no catálogo Ticketmaster`,
       category: genre ?? segment ?? 'Evento',
       genre,
       subGenre,

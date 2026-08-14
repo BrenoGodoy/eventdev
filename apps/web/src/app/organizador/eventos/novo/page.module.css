@@ -18,7 +18,7 @@
 
 .eyebrow {
   margin-bottom: 0.55rem;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -63,12 +63,12 @@
 }
 
 .steps .activeStep {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   color: var(--color-ink);
 }
 
 .steps .activeStep > span {
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
   color: var(--color-surface);
 }
 
@@ -117,7 +117,7 @@
 
 .catalogSearch > svg {
   margin-left: 1.25rem;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .catalogSearch input {
@@ -130,14 +130,14 @@
 
 .catalogSearch button {
   align-self: stretch;
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
   color: var(--color-surface);
   padding: 0 1.75rem;
   font-weight: 900;
 }
 
 .catalogSearch:focus-within {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
@@ -197,7 +197,7 @@
 }
 
 .attractionCopy p {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.72rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -229,7 +229,7 @@
 }
 
 .emptyCatalog svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .emptyCatalog strong {
@@ -267,7 +267,7 @@
 }
 
 .sourceMeta p {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.72rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -317,7 +317,7 @@
 }
 
 .sectionHeading svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .sectionHeading h2 {
@@ -369,7 +369,7 @@
 .field select:focus,
 .iconField:focus-within,
 .priceField:focus-within {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
@@ -382,7 +382,7 @@
 }
 
 .iconField svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .iconField input,

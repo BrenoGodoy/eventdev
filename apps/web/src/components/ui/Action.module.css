@@ -22,7 +22,7 @@
 }
 
 .primary {
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
   color: var(--color-surface);
 }
 
@@ -39,8 +39,17 @@
 
 .secondary:hover:not(:disabled),
 .ghost:hover:not(:disabled) {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   color: var(--color-violet-dark);
+}
+
+.danger {
+  background: var(--color-danger);
+  color: var(--color-surface);
+}
+
+.danger:hover:not(:disabled) {
+  background: #a93232;
 }
 
 .block {

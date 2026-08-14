@@ -80,7 +80,7 @@ export async function fetchEventBySlug(slug: string, signal?: AbortSignal) {
   }
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel carregar o evento.");
+    throw new Error("Não foi possível carregar o evento.");
   }
 
   return (await response.json()) as { event: CatalogEvent };
@@ -88,7 +88,7 @@ export async function fetchEventBySlug(slug: string, signal?: AbortSignal) {
 
 export class EventNotFoundError extends Error {
   constructor() {
-    super("Evento nao encontrado.");
+    super("Evento não encontrado.");
     this.name = "EventNotFoundError";
   }
 }
@@ -100,7 +100,7 @@ async function requestEvents(url: URL, signal?: AbortSignal) {
   });
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel carregar os eventos.");
+    throw new Error("Não foi possível carregar os eventos.");
   }
 
   return (await response.json()) as EventsResponse;
@@ -117,13 +117,13 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   weekday: "short",
   day: "2-digit",
   month: "short",
-  timeZone: "UTC",
+  timeZone: "America/Sao_Paulo",
 });
 
 const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
   hour: "2-digit",
   minute: "2-digit",
-  timeZone: "UTC",
+  timeZone: "America/Sao_Paulo",
 });
 
 export function formatEventPrice(price: number) {

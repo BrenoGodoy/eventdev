@@ -20,6 +20,7 @@ const ticketForGateSelect = {
   publicCode: true,
   signature: true,
   nonce: true,
+  ownerId: true,
   status: true,
   usedAt: true,
   event: {
@@ -34,9 +35,9 @@ const ticketForGateSelect = {
     },
   },
   tier: { select: { name: true } },
+  owner: { select: { name: true } },
   reservation: {
     select: {
-      user: { select: { name: true } },
       paymentStatus: true,
     },
   },
@@ -101,7 +102,7 @@ export class GateService {
           select: {
             publicCode: true,
             tier: { select: { name: true } },
-            reservation: { select: { user: { select: { name: true } } } },
+            owner: { select: { name: true } },
           },
         },
       },
@@ -127,7 +128,7 @@ export class GateService {
 
     if (Boolean(qrPayload) === Boolean(publicCode)) {
       throw new BadRequestException(
-        'Informe um QR ou um codigo de ingresso, mas nao os dois.',
+        'Informe um QR ou um código de ingresso, mas não os dois.',
       );
     }
 
@@ -137,7 +138,7 @@ export class GateService {
     });
 
     if (!event) {
-      throw new BadRequestException('Evento indisponivel para a portaria.');
+      throw new BadRequestException('Evento indisponível para a portaria.');
     }
 
     const source = qrPayload ?? publicCode ?? '';
@@ -208,6 +209,10 @@ export class GateService {
           id: ticket.id,
           eventId: event.id,
           status: TicketStatus.ACTIVE,
+          ownerId: ticket.ownerId,
+          publicCode: ticket.publicCode,
+          nonce: ticket.nonce,
+          signature: ticket.signature,
         },
         data: { status: TicketStatus.USED, usedAt: checkedAt },
       });
@@ -271,8 +276,8 @@ export class GateService {
   ) {
     const messages: Record<GateValidationStatus, string> = {
       VALID: 'Entrada autorizada. Ingresso validado com sucesso.',
-      INVALID: 'Entrada negada. Ingresso invalido ou cancelado.',
-      ALREADY_USED: 'Entrada negada. Este ingresso ja foi utilizado.',
+      INVALID: 'Entrada negada. Ingresso inválido ou cancelado.',
+      ALREADY_USED: 'Entrada negada. Este ingresso já foi utilizado.',
       WRONG_EVENT: `Entrada negada. Este ingresso pertence a ${ticket?.event.title ?? 'outro evento'}.`,
     };
 
@@ -285,7 +290,7 @@ export class GateService {
         ? {
             id: ticket.id,
             publicCode: ticket.publicCode,
-            holderName: ticket.reservation.user.name,
+            holderName: ticket.owner.name,
             tierName: ticket.tier?.name ?? 'Ingresso',
             usedAt: ticket.usedAt?.toISOString() ?? null,
             event: {

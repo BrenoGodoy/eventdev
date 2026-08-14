@@ -22,7 +22,6 @@ import {
 } from "../../lib/events";
 import styles from "./RoleHome.module.css";
 import {
-  CompactEventList,
   EventCollection,
   firstName,
   LoadState,
@@ -96,7 +95,7 @@ export function CustomerHome({ session }: { session: AuthSession }) {
       <RoleHomeStatus
         error={status === "error"}
         eyebrow="Sua EventDev"
-        title="Sua agenda esta chegando"
+        title="Sua agenda está chegando"
       />
     );
   }
@@ -132,8 +131,8 @@ export function CustomerHome({ session }: { session: AuthSession }) {
                 <div className={styles.spotlightShade} />
                 <div className={styles.spotlightContent}>
                   <p>
-                    <Sparkles aria-hidden="true" size={16} /> Sua proxima
-                    experiencia
+                    <Sparkles aria-hidden="true" size={16} /> Sua próxima
+                    experiência
                   </p>
                   <h3>{nextTicket.event.title}</h3>
                   <div className={styles.spotlightMeta}>
@@ -178,7 +177,7 @@ export function CustomerHome({ session }: { session: AuthSession }) {
             />
             <Metric
               icon={CheckCircle2}
-              label="Experiencias vividas"
+              label="Experiências vividas"
               value={tickets.filter((ticket) => ticket.status === "USED").length}
             />
           </div>
@@ -188,7 +187,7 @@ export function CustomerHome({ session }: { session: AuthSession }) {
           <EventCollection
             description="Novas experiências publicadas para continuar explorando."
             events={recommendations}
-            eyebrow="Escolhas para voce"
+            eyebrow="Escolhas para você"
             title="Eventos para viver"
           />
         </div>

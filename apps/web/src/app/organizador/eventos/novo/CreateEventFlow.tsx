@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -22,7 +22,9 @@ import { brazilianStates } from "../../../../lib/brazilian-states";
 import {
   CatalogAttraction,
   createOrganizerEvent,
+  fetchOrganizerEvent,
   searchCatalogAttractions,
+  updateOrganizerEvent,
 } from "../../../../lib/organizer-events";
 import { useOrganizerSession } from "../../../../lib/use-organizer-session";
 import styles from "./page.module.css";
@@ -55,9 +57,38 @@ const emptyForm: EventForm = {
   availableQuantity: "",
 };
 
-export function CreateEventFlow() {
+type CreateEventFlowProps = {
+  eventId?: string;
+};
+
+const eventDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: "America/Sao_Paulo",
+});
+
+const eventTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: "America/Sao_Paulo",
+});
+
+function formatEventFormDate(value: string) {
+  const parts = new Map(
+    eventDateFormatter
+      .formatToParts(new Date(value))
+      .map((part) => [part.type, part.value]),
+  );
+
+  return `${parts.get("year")}-${parts.get("month")}-${parts.get("day")}`;
+}
+
+export function CreateEventFlow({ eventId }: CreateEventFlowProps) {
   const router = useRouter();
   const { session, isReady, isOrganizer, logout } = useOrganizerSession();
+  const isEditing = Boolean(eventId);
   const [query, setQuery] = useState("");
   const [attractions, setAttractions] = useState<CatalogAttraction[]>([]);
   const [selected, setSelected] = useState<CatalogAttraction | null>(null);
@@ -67,17 +98,109 @@ export function CreateEventFlow() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isLoadingEvent, setIsLoadingEvent] = useState(isEditing);
 
   const activeStep = selected ? 2 : 1;
   const pageTitle = useMemo(
-    () => (selected ? `Novo evento com ${selected.name}` : "Criar evento"),
-    [selected],
+    () =>
+      isEditing
+        ? `Editar ${selected?.name ?? "evento"}`
+        : selected
+          ? `Novo evento com ${selected.name}`
+          : "Criar evento",
+    [isEditing, selected],
   );
 
-  if (!isReady || !isOrganizer || !session) {
+  useEffect(() => {
+    if (!eventId || !session || !isOrganizer) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    fetchOrganizerEvent(eventId, session.token, controller.signal)
+      .then(({ event }) => {
+        if (event.status === "CANCELED" || event.status === "FINISHED") {
+          throw new Error(
+            "Eventos cancelados ou finalizados não podem ser editados.",
+          );
+        }
+
+        setSelected({
+          provider: "TICKETMASTER",
+          externalId: event.catalogExternalId ?? event.id,
+          name: event.title,
+          imageUrl: event.imageUrl,
+          imageAlt: event.imageAlt,
+          category: event.category,
+          genre: event.category,
+          subGenre: null,
+          sourceUrl: null,
+          locale: null,
+          upcomingEvents: null,
+        });
+        setForm({
+          title: event.title,
+          category: event.category,
+          description: event.description,
+          date: formatEventFormDate(event.date),
+          time: eventTimeFormatter.format(new Date(event.date)),
+          venue: event.venue,
+          city: event.city,
+          state: event.state,
+          price: String(event.price),
+          capacity: String(event.capacity),
+          availableQuantity: String(event.availableQuantity),
+        });
+      })
+      .catch((requestError: unknown) => {
+        if (
+          requestError instanceof DOMException &&
+          requestError.name === "AbortError"
+        ) {
+          return;
+        }
+
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Não foi possível carregar o evento.",
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoadingEvent(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, [eventId, isOrganizer, session]);
+
+  if (!isReady || !isOrganizer || !session || isLoadingEvent) {
     return (
       <main className={styles.page}>
-        <div className={styles.loading}>Preparando painel...</div>
+        <div className={styles.loading}>
+          {isEditing ? "Carregando evento..." : "Preparando painel..."}
+        </div>
+      </main>
+    );
+  }
+
+  if (isEditing && !selected) {
+    return (
+      <main className={styles.page}>
+        <SiteHeader onLogout={logout} session={session} />
+        <section className={styles.workspace}>
+          <div className={styles.error} role="alert">
+            {error || "Não foi possível carregar o evento."}
+          </div>
+          <Link
+            className={`${actions.action} ${actions.secondary}`}
+            href="/organizador/eventos"
+          >
+            Voltar para meus eventos
+          </Link>
+        </section>
       </main>
     );
   }
@@ -108,7 +231,7 @@ export function CreateEventFlow() {
       setError(
         requestError instanceof Error
           ? requestError.message
-          : "Nao foi possivel consultar o catalogo.",
+          : "Não foi possível consultar o catálogo.",
       );
     } finally {
       setIsSearching(false);
@@ -121,7 +244,7 @@ export function CreateEventFlow() {
       ...emptyForm,
       title: attraction.name,
       category: attraction.genre ?? attraction.category,
-      description: `## Sobre o evento\n\n${attraction.name} em uma experiencia produzida para o publico EventDev.\n\n**Categoria:** ${attraction.genre ?? attraction.category}${attraction.subGenre ? ` · ${attraction.subGenre}` : ""}`,
+      description: `## Sobre o evento\n\n${attraction.name} em uma experiência produzida para o público EventDev.\n\n**Categoria:** ${attraction.genre ?? attraction.category}${attraction.subGenre ? ` · ${attraction.subGenre}` : ""}`,
     });
     setError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -155,28 +278,36 @@ export function CreateEventFlow() {
     setError("");
 
     try {
-      await createOrganizerEvent(
-        {
-          externalId: selected.externalId,
-          title: form.title,
-          category: form.category,
-          description: form.description,
-          date: `${form.date}T${form.time}:00.000Z`,
-          venue: form.venue,
-          city: form.city,
-          state: form.state,
-          price: form.price,
-          capacity: form.capacity,
-          availableQuantity: form.availableQuantity,
-        },
-        session.token,
-      );
-      router.push("/organizador/eventos?created=1");
+      const input = {
+        title: form.title,
+        category: form.category,
+        description: form.description,
+        date: `${form.date}T${form.time}:00-03:00`,
+        venue: form.venue,
+        city: form.city,
+        state: form.state,
+        price: form.price,
+        capacity: form.capacity,
+        availableQuantity: form.availableQuantity,
+      };
+
+      if (eventId) {
+        await updateOrganizerEvent(eventId, input, session.token);
+        router.push("/organizador/eventos?updated=1");
+      } else {
+        await createOrganizerEvent(
+          { ...input, externalId: selected.externalId },
+          session.token,
+        );
+        router.push("/organizador/eventos?created=1");
+      }
     } catch (requestError) {
       setError(
         requestError instanceof Error
           ? requestError.message
-          : "Nao foi possivel publicar o evento.",
+          : isEditing
+            ? "Não foi possível salvar as alterações."
+            : "Não foi possível publicar o evento.",
       );
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
@@ -205,18 +336,18 @@ export function CreateEventFlow() {
           </Link>
         </div>
 
-        <ol className={styles.steps} aria-label="Etapas da criacao">
+        {!isEditing && <ol className={styles.steps} aria-label="Etapas da criação">
           <li
             className={activeStep === 1 ? styles.activeStep : styles.doneStep}
           >
             <span>{activeStep === 1 ? "1" : <Check size={16} />}</span>
-            Atracao
+            Atração
           </li>
           <li className={activeStep === 2 ? styles.activeStep : ""}>
             <span>2</span>
-            Publicacao
+            Publicação
           </li>
-        </ol>
+        </ol>}
 
         {error && (
           <div className={styles.error} role="alert">
@@ -229,9 +360,9 @@ export function CreateEventFlow() {
             <form className={styles.catalogSearch} onSubmit={handleSearch}>
               <Search aria-hidden="true" size={22} />
               <input
-                aria-label="Buscar atracao na Ticketmaster"
+                aria-label="Buscar atração na Ticketmaster"
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Busque por artista, espetaculo ou atracao"
+                placeholder="Busque por artista, espetáculo ou atração"
                 type="search"
                 value={query}
               />
@@ -245,13 +376,13 @@ export function CreateEventFlow() {
             {!hasSearched ? (
               <div className={styles.emptyCatalog}>
                 <Sparkles aria-hidden="true" size={34} />
-                <strong>Encontre a atracao que inspira seu evento</strong>
-                <p>Artistas, festivais, conferencias e espetaculos.</p>
+                <strong>Encontre a atração que inspira seu evento</strong>
+                <p>Artistas, festivais, conferências e espetáculos.</p>
               </div>
             ) : !isSearching && attractions.length === 0 ? (
               <div className={styles.emptyCatalog}>
                 <Search aria-hidden="true" size={34} />
-                <strong>Nenhuma atracao encontrada</strong>
+                <strong>Nenhuma atração encontrada</strong>
                 <p>Tente outro nome ou uma categoria mais ampla.</p>
               </div>
             ) : (
@@ -280,7 +411,7 @@ export function CreateEventFlow() {
                         <p>{attraction.genre ?? attraction.category}</p>
                         <h2>{attraction.name}</h2>
                         <span className={styles.selectAction}>
-                          Usar atracao <ArrowRight size={17} />
+                          Usar atração <ArrowRight size={17} />
                         </span>
                       </div>
                     </button>
@@ -303,17 +434,22 @@ export function CreateEventFlow() {
                 />
               </div>
               <div className={styles.sourceMeta}>
-                <p>Ticketmaster · {selected.genre ?? selected.category}</p>
+                <p>
+                  {isEditing ? "Referência editorial" : "Ticketmaster"} ·{" "}
+                  {selected.genre ?? selected.category}
+                </p>
                 <h2>{selected.name}</h2>
                 {selected.sourceUrl && (
                   <a href={selected.sourceUrl} rel="noreferrer" target="_blank">
                     Ver fonte <ExternalLink size={15} />
                   </a>
                 )}
-                <button onClick={changeAttraction} type="button">
-                  <ArrowLeft aria-hidden="true" size={16} />
-                  Trocar atracao
-                </button>
+                {!isEditing && (
+                  <button onClick={changeAttraction} type="button">
+                    <ArrowLeft aria-hidden="true" size={16} />
+                    Trocar atração
+                  </button>
+                )}
               </div>
             </aside>
 
@@ -346,7 +482,7 @@ export function CreateEventFlow() {
                   />
                 </label>
                 <label className={`${styles.field} ${styles.fullField}`}>
-                  <span>Descricao em Markdown</span>
+                  <span>Descrição em Markdown</span>
                   <textarea
                     maxLength={10000}
                     onChange={(event) =>
@@ -377,7 +513,7 @@ export function CreateEventFlow() {
                   />
                 </label>
                 <label className={styles.field}>
-                  <span>Horario</span>
+                  <span>Horário</span>
                   <input
                     onChange={(event) =>
                       updateField("time", event.target.value)
@@ -396,7 +532,7 @@ export function CreateEventFlow() {
                       onChange={(event) =>
                         updateField("venue", event.target.value)
                       }
-                      placeholder="Nome do espaco"
+                      placeholder="Nome do espaço"
                       required
                       value={form.venue}
                     />
@@ -438,7 +574,7 @@ export function CreateEventFlow() {
                   <h2>Ingressos</h2>
                 </div>
                 <label className={styles.field}>
-                  <span>Preco</span>
+                  <span>Preço</span>
                   <div className={styles.priceField}>
                     <span>R$</span>
                     <input
@@ -470,7 +606,7 @@ export function CreateEventFlow() {
                   </div>
                 </label>
                 <label className={`${styles.field} ${styles.fullField}`}>
-                  <span>Quantidade disponivel</span>
+                  <span>Quantidade disponível</span>
                   <input
                     max={form.capacity || undefined}
                     min="0"
@@ -487,15 +623,27 @@ export function CreateEventFlow() {
 
               <div className={styles.publishBar}>
                 <div>
-                  <strong>Publicacao imediata</strong>
-                  <span>O evento entrara no catalogo publico.</span>
+                  <strong>
+                    {isEditing ? "Alterações do evento" : "Publicação imediata"}
+                  </strong>
+                  <span>
+                    {isEditing
+                      ? "Os dados atualizados serão exibidos no catálogo."
+                      : "O evento entrará no catálogo público."}
+                  </span>
                 </div>
                 <button
                   className={`${actions.action} ${actions.primary}`}
                   disabled={isPublishing}
                   type="submit"
                 >
-                  {isPublishing ? "Publicando..." : "Publicar evento"}
+                  {isPublishing
+                    ? isEditing
+                      ? "Salvando..."
+                      : "Publicando..."
+                    : isEditing
+                      ? "Salvar alterações"
+                      : "Publicar evento"}
                   {!isPublishing && <ArrowRight aria-hidden="true" size={18} />}
                 </button>
               </div>

@@ -21,7 +21,7 @@ export default function HomePage() {
       <section className={styles.hero} aria-labelledby="home-title">
         <div className={styles.heroMedia}>
           <Image
-            alt="Amigos celebrando em um evento com palco violeta e iluminacao verde acido"
+            alt="Amigos celebrando em um evento com palco violeta e iluminação verde ácido"
             className={styles.heroImage}
             fill
             priority

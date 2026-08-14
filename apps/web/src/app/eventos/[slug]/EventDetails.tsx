@@ -72,12 +72,12 @@ export function EventDetails({ slug }: EventDetailsProps) {
           <p className={styles.eyebrow}>EventDev</p>
           <h1>
             {error === "not-found"
-              ? "Evento nao encontrado"
-              : "Nao foi possivel carregar o evento"}
+              ? "Evento não encontrado"
+              : "Não foi possível carregar o evento"}
           </h1>
           <p>
             {error === "not-found"
-              ? "Este evento nao existe ou nao esta publicado."
+              ? "Este evento não existe ou não está publicado."
               : "Tente novamente em alguns instantes."}
           </p>
           <Link className={styles.backButton} href="/eventos">
@@ -150,10 +150,10 @@ export function EventDetails({ slug }: EventDetailsProps) {
 
           <section
             className={styles.description}
-            id="descricao"
+            id="descrição"
             aria-labelledby="description-title"
           >
-            <p className={styles.eyebrow}>Conheca a experiencia</p>
+            <p className={styles.eyebrow}>Conheca a experiência</p>
             <h2 id="description-title">Sobre o evento</h2>
             <div className={styles.markdown}>
               <ReactMarkdown>{event.description}</ReactMarkdown>

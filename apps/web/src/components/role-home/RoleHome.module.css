@@ -22,7 +22,7 @@
 .eyebrow,
 .darkEyebrow {
   margin-bottom: 0.45rem;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.7rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -205,7 +205,7 @@
 .metric svg {
   grid-row: 1 / -1;
   align-self: center;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .metric strong {
@@ -271,7 +271,7 @@
 }
 
 .collectionHeading > a:hover {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   color: var(--color-violet-dark);
 }
 
@@ -384,7 +384,7 @@
 }
 
 .compactRow > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .organizerOverview,
@@ -552,7 +552,7 @@
 }
 
 .operationRow > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .alertBlock,
@@ -573,7 +573,7 @@
 }
 
 .alertItem > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .alertItem span {
@@ -672,7 +672,7 @@
 }
 
 .statusPanel > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .statusPanel h2 {

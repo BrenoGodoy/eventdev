@@ -19,7 +19,7 @@
 }
 
 .eyebrow {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.7rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -64,7 +64,7 @@
 }
 
 .eventSelector select:focus {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
@@ -88,7 +88,7 @@
 
 .eventContext svg {
   flex: 0 0 auto;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .eventContext span {
@@ -153,7 +153,7 @@
 }
 
 .sectionHeading > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .sectionHeading h2,
@@ -292,12 +292,12 @@
 }
 
 .manualForm label > div:focus-within {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
 .manualForm svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .manualForm input {
@@ -345,7 +345,7 @@
 }
 
 .wrongEvent {
-  border-top-color: var(--color-violet);
+  border-top-color: var(--color-violet-dark);
   background: #f8f7ff;
 }
 
@@ -445,7 +445,7 @@
 }
 
 .waitingPanel > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .waitingPanel h2 {
@@ -502,7 +502,7 @@
 
 .wrongDot,
 .historyDENIED {
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
 }
 
 .history {
@@ -518,7 +518,7 @@
 }
 
 .historyHeading > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .history h2 {

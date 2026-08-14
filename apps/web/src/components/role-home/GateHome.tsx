@@ -61,7 +61,7 @@ export function GateHome({ session }: { session: AuthSession }) {
       <RoleHomeStatus
         error={status === "error"}
         eyebrow="Central da portaria"
-        title="Preparando a operacao"
+        title="Preparando a operação"
       />
     );
   }
@@ -89,7 +89,7 @@ export function GateHome({ session }: { session: AuthSession }) {
         <div className={styles.sectionHeading}>
           <div>
             <p className={styles.eyebrow}>Central da portaria</p>
-            <h2 id="gate-home-title">Entrada rapida. Retorno claro.</h2>
+            <h2 id="gate-home-title">Entrada rápida. Retorno claro.</h2>
           </div>
           <Link className={styles.textLink} href="/portaria">
             Abrir portaria <ArrowRight aria-hidden="true" size={17} />
@@ -98,7 +98,7 @@ export function GateHome({ session }: { session: AuthSession }) {
 
         <div className={styles.gateOverview}>
           <div className={styles.overviewCopy}>
-            <p className={styles.darkEyebrow}>Proxima operacao</p>
+            <p className={styles.darkEyebrow}>Próxima operação</p>
             {nextEvent ? (
               <>
                 <h3>{nextEvent.title}</h3>
@@ -116,12 +116,12 @@ export function GateHome({ session }: { session: AuthSession }) {
               </>
             ) : (
               <>
-                <h3>Nenhum evento em operacao.</h3>
-                <p>Os eventos publicados aparecerao aqui.</p>
+                <h3>Nenhum evento em operação.</h3>
+                <p>Os eventos publicados aparecerão aqui.</p>
               </>
             )}
             <Link className={styles.acidAction} href="/portaria">
-              <ScanLine aria-hidden="true" size={19} /> Iniciar validacao
+              <ScanLine aria-hidden="true" size={19} /> Iniciar validação
             </Link>
           </div>
           <div className={styles.overviewMetrics}>
@@ -135,7 +135,7 @@ export function GateHome({ session }: { session: AuthSession }) {
             <Metric
               dark
               icon={AlertTriangle}
-              label="Ja utilizados"
+              label="Já utilizados"
               value={duplicate}
             />
           </div>
@@ -146,7 +146,7 @@ export function GateHome({ session }: { session: AuthSession }) {
 
         <div className={styles.operationsGrid}>
           <section className={styles.listBlock}>
-            <BlockHeading eyebrow="Operacao" title="Proximos acessos" />
+            <BlockHeading eyebrow="Operação" title="Próximos acessos" />
             {upcomingEvents.length ? (
               <div className={styles.operationList}>
                 {upcomingEvents.slice(0, 4).map((event) => (
@@ -154,12 +154,12 @@ export function GateHome({ session }: { session: AuthSession }) {
                 ))}
               </div>
             ) : (
-              <EmptyBlock text="Nenhum evento futuro disponivel para validacao." />
+              <EmptyBlock text="Nenhum evento futuro disponível para validação." />
             )}
           </section>
 
           <aside className={styles.historyBlock}>
-            <BlockHeading eyebrow="Auditoria" title="Ultimas leituras" />
+            <BlockHeading eyebrow="Auditoria" title="Últimas leituras" />
             {checks.length ? (
               <div className={styles.historyList}>
                 {checks.slice(0, 5).map((check) => (
@@ -167,7 +167,7 @@ export function GateHome({ session }: { session: AuthSession }) {
                 ))}
               </div>
             ) : (
-              <EmptyBlock text="As validacoes feitas por esta conta aparecerao aqui." />
+              <EmptyBlock text="As validações feitas por esta conta aparecerão aqui." />
             )}
           </aside>
         </div>

@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthUser } from './auth-user';
@@ -90,7 +90,12 @@ export class AuthService {
       });
     }
 
-    let user;
+    let user: {
+      id: string;
+      name: string;
+      email: string;
+      role: UserRole;
+    };
 
     try {
       user = await this.prisma.user.create({
@@ -103,9 +108,7 @@ export class AuthService {
       });
     } catch (error) {
       if (
-        typeof error === 'object' &&
-        error !== null &&
-        'code' in error &&
+        error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
         throw new ConflictException({
@@ -150,7 +153,7 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException({
         code: 'INVALID_OR_EXPIRED_TOKEN',
-        message: 'Sessao invalida ou expirada.',
+        message: 'Sessão inválida ou expirada.',
       });
     }
 
@@ -161,7 +164,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException({
         code: 'SESSION_USER_NOT_FOUND',
-        message: 'Sessao invalida.',
+        message: 'Sessão inválida.',
       });
     }
 
@@ -181,7 +184,7 @@ export class AuthService {
     if (!token) {
       throw new UnauthorizedException({
         code: 'INVALID_TOKEN',
-        message: 'Token invalido.',
+        message: 'Token inválido.',
       });
     }
 

@@ -53,7 +53,7 @@
 .field input:focus,
 .field select:focus,
 .priceInput:focus-within {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
@@ -84,7 +84,7 @@
   justify-content: center;
   gap: 0.5rem;
   border-radius: var(--radius-md);
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
   color: var(--color-surface);
   padding: 0 1.2rem;
   font-weight: 900;
@@ -104,7 +104,7 @@
 
 .eyebrow {
   margin-bottom: 0.55rem;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -140,7 +140,7 @@
 
 .resultsActions button:hover,
 .status button:hover {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   color: var(--color-violet-dark);
 }
 

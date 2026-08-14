@@ -33,6 +33,7 @@ describe('GateService', () => {
     publicCode: 'ED-ABC123',
     signature: 'signature',
     nonce: 'nonce',
+    ownerId: 'customer-1',
     status: TicketStatus.ACTIVE,
     usedAt: null,
     event: {
@@ -41,12 +42,12 @@ describe('GateService', () => {
       title: 'Evento principal',
       date: new Date('2099-10-20T22:00:00.000Z'),
       venue: 'Arena',
-      city: 'Sao Paulo',
+      city: 'São Paulo',
       state: 'SP',
     },
     tier: { name: 'Pista' },
+    owner: { name: 'Cliente atual' },
     reservation: {
-      user: { name: 'Cliente' },
       paymentStatus: PaymentStatus.PAID,
     },
   };
@@ -130,9 +131,16 @@ describe('GateService', () => {
     });
 
     expect(result.status).toBe('VALID');
+    expect(result.ticket?.holderName).toBe('Cliente atual');
     expect(updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ status: TicketStatus.ACTIVE }),
+        where: expect.objectContaining({
+          status: TicketStatus.ACTIVE,
+          ownerId: ticket.ownerId,
+          publicCode: ticket.publicCode,
+          nonce: ticket.nonce,
+          signature: ticket.signature,
+        }),
         data: expect.objectContaining({ status: TicketStatus.USED }),
       }),
     );
@@ -167,6 +175,38 @@ describe('GateService', () => {
     expect(result.status).toBe('ALREADY_USED');
     expect(create).toHaveBeenCalledWith({
       data: expect.objectContaining({ result: GateCheckResult.DUPLICATE }),
+    });
+  });
+
+  it('rejects stale ticket credentials when a transfer wins concurrently', async () => {
+    ticketFindUnique.mockResolvedValue(ticket);
+    const transferredTicket = {
+      ...ticket,
+      ownerId: 'customer-2',
+      owner: { name: 'Novo titular' },
+      publicCode: 'ED-NEW123',
+      nonce: 'new-nonce',
+      signature: 'new-signature',
+    };
+    const create = jest.fn().mockResolvedValue({ id: 'check-3' });
+    transaction.mockImplementation((callback) =>
+      callback({
+        ticket: {
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+          findUnique: jest.fn().mockResolvedValue(transferredTicket),
+        },
+        gateCheck: { create },
+      }),
+    );
+
+    const result = await service.validate(gateUser, {
+      eventId: selectedEvent.id,
+      publicCode: ticket.publicCode,
+    });
+
+    expect(result.status).toBe('INVALID');
+    expect(create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ result: GateCheckResult.INVALID }),
     });
   });
 });

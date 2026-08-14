@@ -28,7 +28,7 @@ export class RolesGuard implements CanActivate {
     if (!request.user || !requiredRoles.includes(request.user.role)) {
       throw new ForbiddenException({
         code: 'INSUFFICIENT_ROLE',
-        message: 'Seu perfil nao possui permissao para esta operacao.',
+        message: 'Seu perfil não possui permissão para esta operação.',
       });
     }
 

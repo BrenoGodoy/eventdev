@@ -1,4 +1,5 @@
 import { apiBaseUrl } from "./api";
+import { expireSession } from "./auth";
 import { CatalogEvent } from "./events";
 
 export type CatalogAttraction = {
@@ -35,6 +36,11 @@ export type CreateOrganizerEventInput = {
   availableQuantity: string;
 };
 
+export type UpdateOrganizerEventInput = Omit<
+  CreateOrganizerEventInput,
+  "externalId"
+>;
+
 export function searchCatalogAttractions(
   query: string,
   token: string,
@@ -48,6 +54,18 @@ export function searchCatalogAttractions(
 export function fetchOrganizerEvents(token: string, signal?: AbortSignal) {
   return authenticatedRequest<{ events: CatalogEvent[]; total: number }>(
     new URL(`${apiBaseUrl}/organizer/events`),
+    token,
+    { signal },
+  );
+}
+
+export function fetchOrganizerEvent(
+  eventId: string,
+  token: string,
+  signal?: AbortSignal,
+) {
+  return authenticatedRequest<{ event: CatalogEvent }>(
+    new URL(`${apiBaseUrl}/organizer/events/${encodeURIComponent(eventId)}`),
     token,
     { signal },
   );
@@ -68,6 +86,32 @@ export function createOrganizerEvent(
   );
 }
 
+export function updateOrganizerEvent(
+  eventId: string,
+  input: UpdateOrganizerEventInput,
+  token: string,
+) {
+  return authenticatedRequest<{ event: CatalogEvent }>(
+    new URL(`${apiBaseUrl}/organizer/events/${encodeURIComponent(eventId)}`),
+    token,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export function cancelOrganizerEvent(eventId: string, token: string) {
+  return authenticatedRequest<{ event: CatalogEvent }>(
+    new URL(
+      `${apiBaseUrl}/organizer/events/${encodeURIComponent(eventId)}/cancel`,
+    ),
+    token,
+    { method: "POST" },
+  );
+}
+
 async function authenticatedRequest<T>(
   url: URL,
   token: string,
@@ -83,13 +127,16 @@ async function authenticatedRequest<T>(
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      expireSession();
+    }
     const body = (await response.json().catch(() => null)) as {
       message?: string | string[];
     } | null;
     const message = Array.isArray(body?.message)
       ? body.message.join(" ")
       : body?.message;
-    throw new Error(message || "Nao foi possivel concluir a solicitacao.");
+    throw new Error(message || "Não foi possível concluir a solicitação.");
   }
 
   return (await response.json()) as T;

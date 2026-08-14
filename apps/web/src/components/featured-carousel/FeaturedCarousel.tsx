@@ -64,7 +64,7 @@ export function FeaturedCarousel() {
           return;
         }
 
-        setError("Os eventos em destaque estao temporariamente indisponiveis.");
+        setError("Os eventos em destaque estão temporariamente indisponíveis.");
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -156,7 +156,7 @@ export function FeaturedCarousel() {
       >
         <div className={styles.heading}>
           <div>
-            <p className={styles.eyebrow}>Selecao Elite</p>
+            <p className={styles.eyebrow}>Seleção Elite</p>
             <h2 id="featured-title">Eventos em destaque</h2>
           </div>
         </div>
@@ -192,10 +192,10 @@ export function FeaturedCarousel() {
     >
       <div className={styles.heading}>
         <div>
-          <p className={styles.eyebrow}>Selecao Elite</p>
+          <p className={styles.eyebrow}>Seleção Elite</p>
           <h2 id="featured-title">Eventos em destaque</h2>
         </div>
-        <p>{featuredEvents.length} experiencias escolhidas para voce</p>
+        <p>{featuredEvents.length} experiências escolhidas para você</p>
       </div>
 
       <div
@@ -289,9 +289,9 @@ export function FeaturedCarousel() {
           }}
           onPointerDown={(event) => event.stopPropagation()}
           onPointerUp={(event) => event.stopPropagation()}
-          title="Proximo evento"
+          title="Próximo evento"
           type="button"
-          aria-label="Mostrar proximo evento"
+          aria-label="Mostrar próximo evento"
         >
           <ArrowRight aria-hidden="true" size={21} strokeWidth={2.5} />
         </button>

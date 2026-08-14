@@ -39,17 +39,17 @@ const validationPresentation: Record<
   { label: string; icon: typeof CheckCircle2; className: string }
 > = {
   VALID: {
-    label: "Ingresso valido",
+    label: "Ingresso válido",
     icon: CheckCircle2,
     className: styles.valid,
   },
   INVALID: {
-    label: "Ingresso invalido",
+    label: "Ingresso inválido",
     icon: CircleX,
     className: styles.invalid,
   },
   ALREADY_USED: {
-    label: "Ja utilizado",
+    label: "Já utilizado",
     icon: RefreshCw,
     className: styles.duplicate,
   },
@@ -63,8 +63,8 @@ const validationPresentation: Record<
 const historyLabels = {
   ALLOWED: "Entrada autorizada",
   DENIED: "Evento errado",
-  DUPLICATE: "Ja utilizado",
-  INVALID: "Invalido",
+  DUPLICATE: "Já utilizado",
+  INVALID: "Inválido",
 };
 
 export function GateConsole() {
@@ -126,7 +126,7 @@ export function GateConsole() {
           setError(
             requestError instanceof Error
               ? requestError.message
-              : "Nao foi possivel carregar os eventos.",
+              : "Não foi possível carregar os eventos.",
           );
         }
       })
@@ -201,7 +201,7 @@ export function GateConsole() {
         setError(
           requestError instanceof Error
             ? requestError.message
-            : "Nao foi possivel validar o ingresso.",
+            : "Não foi possível validar o ingresso.",
         );
       } finally {
         processingRef.current = false;
@@ -213,13 +213,13 @@ export function GateConsole() {
 
   async function startScanner() {
     if (!selectedEventId) {
-      setError("Selecione um evento antes de abrir a camera.");
+      setError("Selecione um evento antes de abrir a câmera.");
       return;
     }
 
     if (!navigator.mediaDevices?.getUserMedia || !videoRef.current) {
       setError(
-        "A camera nao esta disponivel neste navegador. Use o codigo manual.",
+        "A câmera não está disponível neste navegador. Use o código manual.",
       );
       return;
     }
@@ -267,8 +267,8 @@ export function GateConsole() {
         cameraError.name === "NotAllowedError";
       setError(
         permissionDenied
-          ? "Permissao da camera negada. Libere o acesso ou use o codigo manual."
-          : "Nao foi possivel iniciar a camera. Use o codigo manual.",
+          ? "Permissão da câmera negada. Libere o acesso ou use o código manual."
+          : "Não foi possível iniciar a câmera. Use o código manual.",
       );
     }
   }
@@ -278,7 +278,7 @@ export function GateConsole() {
     const code = manualCode.trim();
 
     if (!code) {
-      setError("Digite o codigo publico do ingresso.");
+      setError("Digite o código público do ingresso.");
       return;
     }
 
@@ -314,18 +314,18 @@ export function GateConsole() {
       <section className={styles.console} aria-labelledby="gate-title">
         <div className={styles.heading}>
           <div>
-            <p className={styles.eyebrow}>Operacao de entrada</p>
+            <p className={styles.eyebrow}>Operação de entrada</p>
             <h1 id="gate-title">Portaria</h1>
-            <p>Valide cada ingresso uma unica vez, com retorno imediato.</p>
+            <p>Valide cada ingresso uma única vez, com retorno imediato.</p>
           </div>
           <label className={styles.eventSelector}>
-            <span>Evento em operacao</span>
+            <span>Evento em operação</span>
             <select
               onChange={(event) => handleEventChange(event.target.value)}
               value={selectedEventId}
             >
               {events.length === 0 && (
-                <option value="">Nenhum evento disponivel</option>
+                <option value="">Nenhum evento disponível</option>
               )}
               {events.map((event) => (
                 <option key={event.id} value={event.id}>
@@ -384,7 +384,7 @@ export function GateConsole() {
               <span
                 className={isScanning ? styles.liveStatus : styles.offStatus}
               >
-                {isScanning ? "Camera ativa" : "Camera desligada"}
+                {isScanning ? "Câmera ativa" : "Câmera desligada"}
               </span>
             </div>
 
@@ -393,8 +393,8 @@ export function GateConsole() {
               {!isScanning && (
                 <div className={styles.cameraPlaceholder}>
                   <Camera aria-hidden="true" size={38} />
-                  <strong>Aponte a camera para o QR</strong>
-                  <p>A leitura e enviada com seguranca para a API.</p>
+                  <strong>Aponte a câmera para o QR</strong>
+                  <p>A leitura é enviada com segurança para a API.</p>
                 </div>
               )}
               <div className={styles.scanFrame} aria-hidden="true" />
@@ -407,11 +407,11 @@ export function GateConsole() {
               type="button"
             >
               {isScanning ? <CameraOff size={19} /> : <Camera size={19} />}
-              {isScanning ? "Desligar camera" : "Iniciar leitura"}
+              {isScanning ? "Desligar câmera" : "Iniciar leitura"}
             </button>
 
             <div className={styles.manualDivider}>
-              <span>ou use o codigo impresso</span>
+              <span>ou use o código impresso</span>
             </div>
 
             <form
@@ -419,7 +419,7 @@ export function GateConsole() {
               onSubmit={handleManualValidation}
             >
               <label>
-                <span>Codigo do ingresso</span>
+                <span>Código do ingresso</span>
                 <div>
                   <Keyboard aria-hidden="true" size={19} />
                   <input
@@ -439,7 +439,7 @@ export function GateConsole() {
                 disabled={isValidating || !selectedEventId}
                 type="submit"
               >
-                {isValidating ? "Validando..." : "Validar codigo"}
+                {isValidating ? "Validando..." : "Validar código"}
               </button>
             </form>
           </section>
@@ -466,7 +466,7 @@ export function GateConsole() {
                       <dd>{result.ticket.tierName}</dd>
                     </div>
                     <div>
-                      <dt>Codigo</dt>
+                      <dt>Código</dt>
                       <dd>{result.ticket.publicCode}</dd>
                     </div>
                   </dl>
@@ -477,7 +477,7 @@ export function GateConsole() {
                   type="button"
                 >
                   <Check aria-hidden="true" size={19} />
-                  Proxima leitura
+                  Próxima leitura
                 </button>
               </section>
             ) : (
@@ -487,13 +487,13 @@ export function GateConsole() {
                 <h2>Resultado claro e imediato</h2>
                 <ul>
                   <li>
-                    <span className={styles.validDot} /> Valido
+                    <span className={styles.validDot} /> Válido
                   </li>
                   <li>
-                    <span className={styles.invalidDot} /> Invalido
+                    <span className={styles.invalidDot} /> Inválido
                   </li>
                   <li>
-                    <span className={styles.duplicateDot} /> Ja utilizado
+                    <span className={styles.duplicateDot} /> Já utilizado
                   </li>
                   <li>
                     <span className={styles.wrongDot} /> Evento errado
@@ -506,7 +506,7 @@ export function GateConsole() {
               <div className={styles.historyHeading}>
                 <div>
                   <p className={styles.eyebrow}>Auditoria local</p>
-                  <h2 id="history-title">Ultimas leituras</h2>
+                  <h2 id="history-title">Últimas leituras</h2>
                 </div>
                 <Clock3 aria-hidden="true" size={20} />
               </div>
@@ -522,7 +522,7 @@ export function GateConsole() {
                       <div>
                         <strong>{historyLabels[check.result]}</strong>
                         <small>
-                          {check.ticket?.publicCode ?? "Codigo nao reconhecido"}
+                          {check.ticket?.publicCode ?? "Código não reconhecido"}
                         </small>
                       </div>
                       <time dateTime={check.createdAt}>

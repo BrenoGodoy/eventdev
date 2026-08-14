@@ -87,7 +87,7 @@ describe('CheckoutService', () => {
         title: 'Evento',
         date: new Date('2099-09-20T22:00:00.000Z'),
         venue: 'Arena',
-        city: 'Sao Paulo',
+        city: 'São Paulo',
         state: 'SP',
         imageUrl: '/event.png',
         imageAlt: 'Evento',

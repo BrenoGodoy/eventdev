@@ -132,7 +132,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
     const eventId = input?.eventId?.trim();
 
     if (!eventId) {
-      throw new BadRequestException('Evento nao informado.');
+      throw new BadRequestException('Evento não informado.');
     }
 
     const requestedItems = this.validateItems(input?.items);
@@ -158,11 +158,11 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (!event || event.date.getTime() <= Date.now()) {
-      throw new NotFoundException('Evento indisponivel para reservas.');
+      throw new NotFoundException('Evento indisponível para reservas.');
     }
 
     if (event.ticketTiers.length !== requestedItems.length) {
-      throw new BadRequestException('Um dos tipos de ingresso e invalido.');
+      throw new BadRequestException('Um dos tipos de ingresso é inválido.');
     }
 
     const tiersById = new Map(event.ticketTiers.map((tier) => [tier.id, tier]));
@@ -170,7 +170,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
       const tier = tiersById.get(item.tierId);
 
       if (!tier) {
-        throw new BadRequestException('Tipo de ingresso invalido.');
+        throw new BadRequestException('Tipo de ingresso inválido.');
       }
 
       const unitPrice = Number(tier.price);
@@ -198,7 +198,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
 
         if (updatedTier.count !== 1) {
           throw new ConflictException(
-            'Quantidade indisponivel. Atualize a selecao e tente novamente.',
+            'Quantidade indisponível. Atualize a seleção e tente novamente.',
           );
         }
       }
@@ -252,7 +252,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (!reservation) {
-      throw new NotFoundException('Reserva nao encontrada.');
+      throw new NotFoundException('Reserva não encontrada.');
     }
 
     return { reservation: this.serializeReservation(reservation) };
@@ -274,7 +274,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
     });
 
     if (!current) {
-      throw new NotFoundException('Reserva nao encontrada.');
+      throw new NotFoundException('Reserva não encontrada.');
     }
 
     if (
@@ -282,7 +282,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
       !current.expiresAt ||
       current.expiresAt.getTime() <= Date.now()
     ) {
-      throw new GoneException('Reserva expirada ou ja processada.');
+      throw new GoneException('Reserva expirada ou já processada.');
     }
 
     if (input.scenario === 'DECLINED') {
@@ -299,7 +299,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
           });
 
           if (declined.count !== 1) {
-            throw new ConflictException('Reserva ja processada ou expirada.');
+            throw new ConflictException('Reserva já processada ou expirada.');
           }
 
           return transaction.reservation.findUniqueOrThrow({
@@ -331,7 +331,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
       });
 
       if (confirmed.count !== 1) {
-        throw new ConflictException('Reserva ja processada ou expirada.');
+        throw new ConflictException('Reserva já processada ou expirada.');
       }
 
       const reservation = await transaction.reservation.findUniqueOrThrow({
@@ -481,7 +481,7 @@ export class CheckoutService implements OnModuleInit, OnModuleDestroy {
           !item.tierId || !Number.isInteger(item.quantity) || item.quantity < 1,
       )
     ) {
-      throw new BadRequestException('Selecao de ingressos invalida.');
+      throw new BadRequestException('Seleção de ingressos inválida.');
     }
 
     if (quantity > MAX_TICKETS_PER_RESERVATION) {

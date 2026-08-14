@@ -146,7 +146,7 @@ export function MyTickets() {
         setError(
           requestError instanceof Error
             ? requestError.message
-            : "Nao foi possivel carregar seus ingressos.",
+            : "Não foi possível carregar seus ingressos.",
         );
       })
       .finally(() => {
@@ -198,14 +198,14 @@ export function MyTickets() {
           <div className={styles.loading}>Carregando ingressos...</div>
         ) : error ? (
           <div className={styles.loading} role="alert">
-            <strong>Carteira indisponivel</strong>
+            <strong>Carteira indisponível</strong>
             <p>{error}</p>
           </div>
         ) : tickets.length === 0 ? (
           <div className={styles.empty}>
             <TicketIcon aria-hidden="true" size={36} />
-            <strong>Sua carteira esta vazia</strong>
-            <p>Quando uma compra for aprovada, os ingressos aparecerao aqui.</p>
+            <strong>Sua carteira está vazia</strong>
+            <p>Quando uma compra for aprovada, os ingressos aparecerão aqui.</p>
             <Link
               className={`${actions.action} ${actions.primary}`}
               href="/eventos"
@@ -245,7 +245,7 @@ export function MyTickets() {
                     {ticket.event.venue} · {ticket.event.city}, {ticket.event.state}
                   </p>
                   <div className={styles.publicCode}>
-                    <span>Codigo do ingresso</span>
+                    <span>Código do ingresso</span>
                     <strong>{ticket.publicCode}</strong>
                   </div>
 

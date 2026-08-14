@@ -1,4 +1,5 @@
 import { apiBaseUrl } from "./api";
+import { expireSession } from "./auth";
 
 export type GateEvent = {
   id: string;
@@ -39,7 +40,7 @@ export type GateCheck = {
   ticket: {
     publicCode: string;
     tier: { name: string } | null;
-    reservation: { user: { name: string } };
+    owner: { name: string };
   } | null;
 };
 
@@ -90,13 +91,16 @@ async function gateRequest<T>(url: string, token: string, init: RequestInit) {
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      expireSession();
+    }
     const body = (await response.json().catch(() => null)) as {
       message?: string | string[];
     } | null;
     const message = Array.isArray(body?.message)
       ? body.message.join(" ")
       : body?.message;
-    throw new Error(message || "Nao foi possivel concluir a leitura.");
+    throw new Error(message || "Não foi possível concluir a leitura.");
   }
 
   return (await response.json()) as T;

@@ -10,7 +10,7 @@ export function Brand({ inverse = false }: BrandProps) {
     <Link
       className={`${styles.brand} ${inverse ? styles.inverse : ""}`}
       href="/"
-      aria-label="EventDev Tickets - pagina inicial"
+      aria-label="EventDev Tickets - página inicial"
     >
       <span className={styles.symbol} aria-hidden="true">
         <svg viewBox="0 0 104 72" role="presentation">

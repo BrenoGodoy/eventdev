@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { ticketSigningSecret } from '../config/environment';
 
 export type TicketQrClaims = {
   version: 1;
@@ -71,12 +72,4 @@ export function verifyTicketQrPayload(payload: SignedTicketQr) {
 
 function ticketSignatureSource(claims: TicketQrClaims) {
   return `${claims.ticketId}.${claims.eventId}.${claims.publicCode}.${claims.nonce}`;
-}
-
-function ticketSigningSecret() {
-  return (
-    process.env.TICKET_SIGNING_SECRET ??
-    process.env.JWT_SECRET ??
-    'eventdev-local-ticket-signing-secret'
-  );
 }

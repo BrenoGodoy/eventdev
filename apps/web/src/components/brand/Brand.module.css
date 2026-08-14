@@ -69,7 +69,7 @@
 }
 
 .name strong {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-weight: 900;
 }
 

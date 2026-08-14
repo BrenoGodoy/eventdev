@@ -89,7 +89,7 @@
 
 .panelEyebrow {
   margin-bottom: 0.75rem;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.72rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -189,13 +189,13 @@
 
 .field > input:focus,
 .inputControl:focus-within {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   outline: none;
   box-shadow: var(--shadow-focus);
 }
 
 .inputControl:focus-within > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .error {

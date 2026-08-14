@@ -33,7 +33,7 @@
 }
 
 .eyebrow {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.72rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -77,12 +77,12 @@
 }
 
 .steps .activeStep {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   color: var(--color-ink);
 }
 
 .steps .activeStep > span {
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
   color: var(--color-surface);
 }
 
@@ -135,7 +135,7 @@
 
 .sectionTitle > svg {
   flex: 0 0 auto;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .sectionTitle h2 {
@@ -162,7 +162,7 @@
 
 .tierAccent {
   align-self: stretch;
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
 }
 
 .tier:nth-child(2) .tierAccent {
@@ -183,7 +183,7 @@
 }
 
 .tierHeading span {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.68rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -242,7 +242,7 @@
 }
 
 .stepper button:hover:not(:disabled) {
-  background: var(--color-violet);
+  background: var(--color-violet-dark);
   color: var(--color-surface);
 }
 
@@ -318,7 +318,7 @@
 
 .eventPreview p svg {
   flex: 0 0 auto;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .orderSummary {
@@ -406,7 +406,7 @@
 
 .timer svg {
   grid-row: 1 / 3;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .timer span {
@@ -465,7 +465,7 @@
 
 .field > input:focus,
 .iconInput:focus-within {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
@@ -477,7 +477,7 @@
 }
 
 .iconInput svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .iconInput input {
@@ -514,11 +514,11 @@
 }
 
 .scenarios input {
-  accent-color: var(--color-violet);
+  accent-color: var(--color-violet-dark);
 }
 
 .scenarios label > svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .scenarios label > span {
@@ -534,7 +534,7 @@
 }
 
 .scenarios .selectedScenario {
-  border-color: var(--color-violet);
+  border-color: var(--color-violet-dark);
   box-shadow: var(--shadow-focus);
 }
 
@@ -555,7 +555,7 @@
 }
 
 .expired svg {
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
 }
 
 .expired h2,

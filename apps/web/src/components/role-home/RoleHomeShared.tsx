@@ -50,8 +50,8 @@ export function EventCollection({
       ) : (
         <EmptyBlock
           href="/eventos"
-          label="Ver catalogo"
-          text="Novos eventos aparecerao aqui em breve."
+          label="Ver catálogo"
+          text="Novos eventos aparecerão aqui em breve."
         />
       )}
     </section>
@@ -172,7 +172,7 @@ export function GateCheckRow({ check }: { check: GateCheck }) {
   const labels = {
     ALLOWED: "Autorizada",
     DENIED: "Evento errado",
-    DUPLICATE: "Ja utilizado",
+    DUPLICATE: "Já utilizado",
     INVALID: "Invalida",
   };
 
@@ -188,7 +188,7 @@ export function GateCheckRow({ check }: { check: GateCheck }) {
       <span>
         <strong>{labels[check.result]}</strong>
         <small>
-          {check.ticket?.reservation.user.name ?? "Codigo nao reconhecido"} ·{" "}
+          {check.ticket?.owner.name ?? "Código não reconhecido"} ·{" "}
           {check.event.title}
         </small>
       </span>
@@ -272,9 +272,9 @@ export function RoleHomeStatus({
           <Sparkles aria-hidden="true" size={28} />
         )}
         <p className={styles.eyebrow}>{eyebrow}</p>
-        <h2>{error ? "Nao foi possivel carregar esta area." : title}</h2>
+        <h2>{error ? "Não foi possível carregar esta área." : title}</h2>
         {error && (
-          <p>As demais areas continuam disponiveis pelo menu principal.</p>
+          <p>As demais áreas continuam disponíveis pelo menu principal.</p>
         )}
       </div>
     </section>
@@ -290,8 +290,8 @@ export function organizerAlerts(events: CatalogEvent[]) {
     return [
       {
         icon: Plus,
-        title: "Catalogo vazio",
-        detail: "Publique seu primeiro evento para iniciar a operacao.",
+        title: "Catálogo vazio",
+        detail: "Publique seu primeiro evento para iniciar a operação.",
       },
     ];
   }
@@ -311,22 +311,22 @@ export function organizerAlerts(events: CatalogEvent[]) {
     alerts.push({
       icon: AlertTriangle,
       title: "Baixa disponibilidade",
-      detail: `${lowAvailability.title} tem ${lowAvailability.availableQuantity} ingressos disponiveis.`,
+      detail: `${lowAvailability.title} tem ${lowAvailability.availableQuantity} ingressos disponíveis.`,
     });
   }
 
   if (nextEvent) {
     alerts.push({
       icon: Clock3,
-      title: "Proximo da agenda",
+      title: "Próximo da agenda",
       detail: `${nextEvent.title} acontece em ${formatEventDate(nextEvent.date)}.`,
     });
   }
 
   alerts.push({
     icon: CheckCircle2,
-    title: "Catalogo publicado",
-    detail: `${events.length} ${events.length === 1 ? "evento esta" : "eventos estao"} visiveis para os clientes.`,
+    title: "Catálogo publicado",
+    detail: `${events.length} ${events.length === 1 ? "evento está" : "eventos estão"} visíveis para os clientes.`,
   });
 
   return alerts;

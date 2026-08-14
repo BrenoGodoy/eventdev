@@ -5,12 +5,13 @@ import { AuthGuard } from './auth.guard';
 import { RolesGuard } from './roles.guard';
 import { AuthService } from './auth.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { jwtSecret } from '../config/environment';
 
 @Module({
   imports: [
     PrismaModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET ?? 'eventdev-local-demo-secret',
+      secret: jwtSecret(),
       signOptions: { algorithm: 'HS256' },
     }),
   ],

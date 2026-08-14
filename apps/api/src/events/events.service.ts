@@ -8,7 +8,10 @@ import {
   CatalogProvider,
   EventMode,
   EventStatus,
+  PaymentStatus,
   Prisma,
+  ReservationStatus,
+  TicketStatus,
 } from '@prisma/client';
 import { AuthUser } from '../auth/auth-user';
 import { CatalogService } from '../catalog/catalog.service';
@@ -102,6 +105,11 @@ export type CreateOrganizerEventInput = {
   availableQuantity?: number | string;
 };
 
+export type UpdateOrganizerEventInput = Omit<
+  CreateOrganizerEventInput,
+  'externalId'
+>;
+
 @Injectable()
 export class EventsService {
   constructor(
@@ -134,6 +142,7 @@ export class EventsService {
       where: {
         featured: true,
         status: EventStatus.PUBLISHED,
+        date: { gt: new Date() },
       },
       orderBy: [{ featuredOrder: 'asc' }, { date: 'asc' }],
       select: eventSelect,
@@ -150,12 +159,13 @@ export class EventsService {
       where: {
         slug,
         status: EventStatus.PUBLISHED,
+        date: { gt: new Date() },
       },
       select: eventSelect,
     });
 
     if (!event) {
-      throw new NotFoundException('Evento nao encontrado.');
+      throw new NotFoundException('Evento não encontrado.');
     }
 
     return { event: this.serialize(event) };
@@ -174,13 +184,26 @@ export class EventsService {
     };
   }
 
+  async findMineById(organizerId: string, eventId: string) {
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, organizerId },
+      select: eventSelect,
+    });
+
+    if (!event) {
+      throw new NotFoundException('Evento não encontrado.');
+    }
+
+    return { event: this.serialize(event) };
+  }
+
   async createForOrganizer(
     organizer: AuthUser,
     input: CreateOrganizerEventInput,
   ) {
     const externalId = this.requiredText(
       input.externalId,
-      'Selecione uma atracao do catalogo.',
+      'Selecione uma atração do catálogo.',
       160,
     );
     const attraction = await this.catalogService.findAttraction(externalId);
@@ -191,7 +214,7 @@ export class EventsService {
     );
     const description = this.requiredText(
       input.description,
-      'Informe a descricao do evento.',
+      'Informe a descrição do evento.',
       10_000,
     );
     const category = this.requiredText(
@@ -214,18 +237,18 @@ export class EventsService {
     const price = this.parseMoney(input.price);
     const capacity = this.parseInteger(
       input.capacity,
-      'Capacidade deve ser um numero inteiro maior ou igual a dois.',
+      'Capacidade deve ser um número inteiro maior ou igual a dois.',
       2,
     );
     const availableQuantity = this.parseInteger(
       input.availableQuantity,
-      'Quantidade disponivel deve ser um numero inteiro positivo ou zero.',
+      'Quantidade disponível deve ser um número inteiro positivo ou zero.',
       0,
     );
 
     if (availableQuantity > capacity) {
       throw new BadRequestException(
-        'Quantidade disponivel nao pode superar a capacidade.',
+        'Quantidade disponível não pode superar a capacidade.',
       );
     }
 
@@ -249,7 +272,7 @@ export class EventsService {
           provider: attraction.provider,
           attraction,
           importedAt: new Date().toISOString(),
-        } as Prisma.InputJsonValue,
+        },
         date,
         venue,
         city,
@@ -268,7 +291,7 @@ export class EventsService {
             {
               type: 'GENERAL',
               name: 'Pista',
-              description: 'Acesso a pista e a toda a programacao principal.',
+              description: 'Acesso a pista e a toda a programação principal.',
               price,
               capacity: generalCapacity,
               availableQuantity: generalAvailable,
@@ -277,7 +300,7 @@ export class EventsService {
               type: 'PREMIUM',
               name: 'Pista Premium',
               description:
-                'Area exclusiva mais proxima do palco, com entrada dedicada.',
+                'Área exclusiva mais próxima do palco, com entrada dedicada.',
               price: Math.round(price * 1.6 * 100) / 100,
               capacity: premiumCapacity,
               availableQuantity: premiumAvailable,
@@ -291,6 +314,265 @@ export class EventsService {
     return { event: this.serialize(event) };
   }
 
+  async updateForOrganizer(
+    organizerId: string,
+    eventId: string,
+    input: UpdateOrganizerEventInput,
+  ) {
+    const title = this.requiredText(
+      input.title,
+      'Informe o nome do evento.',
+      140,
+    );
+    const description = this.requiredText(
+      input.description,
+      'Informe a descrição do evento.',
+      10_000,
+    );
+    const category = this.requiredText(
+      input.category,
+      'Informe a categoria do evento.',
+      80,
+    );
+    const date = this.parseEventDate(input.date);
+    const venue = this.requiredText(
+      input.venue,
+      'Informe o local do evento.',
+      160,
+    );
+    const city = this.requiredText(
+      input.city,
+      'Informe a cidade do evento.',
+      100,
+    );
+    const state = this.validateState(input.state);
+    const price = this.parseMoney(input.price);
+    const capacity = this.parseInteger(
+      input.capacity,
+      'Capacidade deve ser um número inteiro maior ou igual a dois.',
+      2,
+    );
+    const requestedAvailability = this.parseInteger(
+      input.availableQuantity,
+      'Quantidade disponível deve ser um número inteiro positivo ou zero.',
+      0,
+    );
+
+    return this.prisma.$transaction(
+      async (transaction) => {
+        const current = await transaction.event.findFirst({
+          where: { id: eventId, organizerId },
+          select: {
+            id: true,
+            status: true,
+            ticketTiers: {
+              where: { active: true },
+              select: { id: true, type: true },
+            },
+          },
+        });
+
+        if (!current) {
+          throw new NotFoundException('Evento não encontrado.');
+        }
+
+        if (
+          current.status === EventStatus.CANCELED ||
+          current.status === EventStatus.FINISHED
+        ) {
+          throw new BadRequestException(
+            'Eventos cancelados ou finalizados não podem ser editados.',
+          );
+        }
+
+        const commitments = await transaction.reservationItem.groupBy({
+          by: ['tierId'],
+          where: {
+            tierId: { in: current.ticketTiers.map((tier) => tier.id) },
+            reservation: {
+              status: {
+                in: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED],
+              },
+            },
+          },
+          _sum: { quantity: true },
+        });
+        const committedByTier = new Map(
+          commitments.map((item) => [item.tierId, item._sum.quantity ?? 0]),
+        );
+        const generalTier = current.ticketTiers.find(
+          (tier) => tier.type === 'GENERAL',
+        );
+        const premiumTier = current.ticketTiers.find(
+          (tier) => tier.type === 'PREMIUM',
+        );
+
+        if (!generalTier || !premiumTier) {
+          throw new BadRequestException(
+            'Os lotes do evento estão incompletos e precisam ser revisados.',
+          );
+        }
+
+        const generalCommitted = committedByTier.get(generalTier.id) ?? 0;
+        const premiumCommitted = committedByTier.get(premiumTier.id) ?? 0;
+        const committed = generalCommitted + premiumCommitted;
+
+        if (capacity < committed) {
+          throw new BadRequestException(
+            `A capacidade não pode ser menor que os ${committed} ingressos reservados ou vendidos.`,
+          );
+        }
+
+        if (requestedAvailability > capacity - committed) {
+          throw new BadRequestException(
+            `Há ${committed} ingressos reservados ou vendidos. A disponibilidade máxima é ${capacity - committed}.`,
+          );
+        }
+
+        const tierCapacity = this.allocateTierCapacities(
+          capacity,
+          generalCommitted,
+          premiumCommitted,
+        );
+        const generalMaximumAvailability =
+          tierCapacity.general - generalCommitted;
+        const generalAvailability = Math.min(
+          requestedAvailability,
+          generalMaximumAvailability,
+        );
+        const premiumAvailability = requestedAvailability - generalAvailability;
+
+        if (premiumAvailability > tierCapacity.premium - premiumCommitted) {
+          throw new BadRequestException(
+            'A disponibilidade informada não cabe nos lotes atuais.',
+          );
+        }
+
+        await transaction.event.update({
+          where: { id: current.id },
+          data: {
+            title,
+            description,
+            category,
+            date,
+            venue,
+            city,
+            state,
+            price,
+            capacity,
+            availableQuantity: requestedAvailability,
+          },
+        });
+        await transaction.eventTicketTier.update({
+          where: { id: generalTier.id },
+          data: {
+            price,
+            capacity: tierCapacity.general,
+            availableQuantity: generalAvailability,
+          },
+        });
+        await transaction.eventTicketTier.update({
+          where: { id: premiumTier.id },
+          data: {
+            price: Math.round(price * 1.6 * 100) / 100,
+            capacity: tierCapacity.premium,
+            availableQuantity: premiumAvailability,
+          },
+        });
+
+        const event = await transaction.event.findUniqueOrThrow({
+          where: { id: current.id },
+          select: eventSelect,
+        });
+
+        return { event: this.serialize(event) };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  }
+
+  async cancelForOrganizer(organizerId: string, eventId: string) {
+    return this.prisma.$transaction(
+      async (transaction) => {
+        const current = await transaction.event.findFirst({
+          where: { id: eventId, organizerId },
+          select: { id: true, status: true },
+        });
+
+        if (!current) {
+          throw new NotFoundException('Evento não encontrado.');
+        }
+
+        if (current.status === EventStatus.FINISHED) {
+          throw new BadRequestException(
+            'Um evento finalizado não pode ser cancelado.',
+          );
+        }
+
+        if (current.status !== EventStatus.CANCELED) {
+          const canceledAt = new Date();
+
+          await transaction.shareToken.updateMany({
+            where: {
+              ticket: { eventId: current.id },
+              revokedAt: null,
+              consumedAt: null,
+            },
+            data: { revokedAt: canceledAt },
+          });
+          await transaction.ticket.updateMany({
+            where: {
+              eventId: current.id,
+              status: TicketStatus.ACTIVE,
+            },
+            data: { status: TicketStatus.CANCELED },
+          });
+          await transaction.reservation.updateMany({
+            where: {
+              eventId: current.id,
+              paymentStatus: PaymentStatus.PAID,
+            },
+            data: {
+              status: ReservationStatus.CANCELED,
+              paymentStatus: PaymentStatus.REFUNDED,
+            },
+          });
+          await transaction.reservation.updateMany({
+            where: {
+              eventId: current.id,
+              status: ReservationStatus.PENDING,
+            },
+            data: {
+              status: ReservationStatus.CANCELED,
+              paymentStatus: PaymentStatus.FAILED,
+            },
+          });
+          await transaction.eventTicketTier.updateMany({
+            where: { eventId: current.id },
+            data: { active: false, availableQuantity: 0 },
+          });
+          await transaction.event.update({
+            where: { id: current.id },
+            data: {
+              status: EventStatus.CANCELED,
+              featured: false,
+              featuredOrder: null,
+              availableQuantity: 0,
+            },
+          });
+        }
+
+        const event = await transaction.event.findUniqueOrThrow({
+          where: { id: current.id },
+          select: eventSelect,
+        });
+
+        return { event: this.serialize(event) };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  }
+
   private buildWhere(filters: EventFilters): Prisma.EventWhereInput {
     const query = filters.query?.trim();
     const state = filters.state?.trim().toUpperCase();
@@ -298,6 +580,7 @@ export class EventsService {
     const maxPrice = filters.maxPrice?.trim();
     const where: Prisma.EventWhereInput = {
       status: EventStatus.PUBLISHED,
+      date: { gt: new Date() },
     };
 
     if (query) {
@@ -323,7 +606,7 @@ export class EventsService {
         throw new BadRequestException('Data deve estar no formato YYYY-MM-DD.');
       }
 
-      const start = new Date(`${date}T00:00:00.000Z`);
+      const start = new Date(`${date}T03:00:00.000Z`);
       const end = new Date(start);
       end.setUTCDate(end.getUTCDate() + 1);
       where.date = { gte: start, lt: end };
@@ -334,7 +617,7 @@ export class EventsService {
 
       if (!Number.isFinite(parsedMaxPrice) || parsedMaxPrice < 0) {
         throw new BadRequestException(
-          'Preco maximo deve ser um valor positivo.',
+          'Preço maximo deve ser um valor positivo.',
         );
       }
 
@@ -366,13 +649,13 @@ export class EventsService {
 
   private parseEventDate(value?: string) {
     if (!value) {
-      throw new BadRequestException('Informe a data e o horario do evento.');
+      throw new BadRequestException('Informe a data e o horário do evento.');
     }
 
     const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) {
-      throw new BadRequestException('Data e horario do evento sao invalidos.');
+      throw new BadRequestException('Data e horário do evento são inválidos.');
     }
 
     if (date.getTime() <= Date.now()) {
@@ -396,7 +679,7 @@ export class EventsService {
     const parsed = Number(String(value ?? '').replace(',', '.'));
 
     if (!Number.isFinite(parsed) || parsed < 0 || parsed > 99999999.99) {
-      throw new BadRequestException('Preco deve ser um valor positivo valido.');
+      throw new BadRequestException('Preço deve ser um valor positivo válido.');
     }
 
     return parsed;
@@ -426,6 +709,33 @@ export class EventsService {
       .slice(0, 72);
 
     return `${base || 'evento'}-${randomUUID().slice(0, 8)}`;
+  }
+
+  private allocateTierCapacities(
+    capacity: number,
+    generalCommitted: number,
+    premiumCommitted: number,
+  ) {
+    let general = Math.floor(capacity * 0.8);
+    let premium = capacity - general;
+
+    if (general < generalCommitted) {
+      general = generalCommitted;
+      premium = capacity - general;
+    }
+
+    if (premium < premiumCommitted) {
+      premium = premiumCommitted;
+      general = capacity - premium;
+    }
+
+    if (general < generalCommitted || premium < premiumCommitted) {
+      throw new BadRequestException(
+        'A capacidade não comporta os ingressos já reservados em cada lote.',
+      );
+    }
+
+    return { general, premium };
   }
 
   private serialize(event: {

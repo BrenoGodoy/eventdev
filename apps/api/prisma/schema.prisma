@@ -93,7 +93,7 @@ model Event {
   description       String
   category          String
   catalogSnapshot   Json
-  date              DateTime
+  date              DateTime          @db.Timestamptz(3)
   venue             String
   city              String
   state             String            @db.Char(2)

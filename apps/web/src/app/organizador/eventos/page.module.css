@@ -20,7 +20,7 @@
 
 .eyebrow {
   margin-bottom: 0.55rem;
-  color: var(--color-violet);
+  color: var(--color-violet-dark);
   font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -52,6 +52,111 @@
   color: var(--color-success);
   padding: 0.9rem 1rem;
   font-weight: 900;
+}
+
+.cardAction,
+.cancelAction,
+.iconAction {
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.cardAction:hover,
+.iconAction:hover {
+  border-color: var(--color-violet-dark);
+  color: var(--color-violet-dark);
+}
+
+.iconAction {
+  width: 2.35rem;
+  padding: 0;
+}
+
+.cancelAction {
+  margin-left: auto;
+  border-color: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.cancelAction:hover {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.closedEvent {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.modalBackdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(11 16 32 / 64%);
+  padding: var(--page-gutter);
+}
+
+.modal {
+  position: relative;
+  width: min(100%, 34rem);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: 0 1.5rem 4rem rgb(11 16 32 / 28%);
+  padding: 2rem;
+}
+
+.closeModal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.closeModal:hover {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.modalIcon {
+  margin-bottom: 1rem;
+  color: var(--color-danger);
+}
+
+.modal h2 {
+  margin-bottom: 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+}
+
+.modal p {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
 }
 
 .resultsRow {
@@ -114,5 +219,18 @@
   .grid {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+
+  .modal {
+    padding: 1.5rem;
+  }
+
+  .modalActions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .modalActions button {
+    width: 100%;
   }
 }

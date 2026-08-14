@@ -17,6 +17,7 @@ export type AuthSession = {
 };
 
 const STORAGE_KEY = "eventdev.session";
+export const SESSION_EXPIRED_EVENT = "eventdev:session-expired";
 
 export async function login(email: string, password: string) {
   const response = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -83,7 +84,14 @@ export function readSession(): AuthSession | null {
   }
 
   try {
-    return JSON.parse(rawSession) as AuthSession;
+    const session = JSON.parse(rawSession) as AuthSession;
+
+    if (!isValidSession(session) || tokenExpirationMs(session.token) <= Date.now()) {
+      clearSession();
+      return null;
+    }
+
+    return session;
   } catch {
     window.localStorage.removeItem(STORAGE_KEY);
     return null;
@@ -91,5 +99,51 @@ export function readSession(): AuthSession | null {
 }
 
 export function clearSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   window.localStorage.removeItem(STORAGE_KEY);
+}
+
+export function expireSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  clearSession();
+  window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+}
+
+export function tokenExpirationMs(token: string) {
+  try {
+    const encodedPayload = token.split(".")[1];
+    const normalizedPayload = encodedPayload
+      .replaceAll("-", "+")
+      .replaceAll("_", "/");
+    const payload = JSON.parse(
+      window.atob(
+        normalizedPayload.padEnd(
+          Math.ceil(normalizedPayload.length / 4) * 4,
+          "=",
+        ),
+      ),
+    ) as { exp?: unknown };
+
+    return typeof payload.exp === "number" ? payload.exp * 1000 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function isValidSession(value: AuthSession) {
+  return Boolean(
+    value &&
+      typeof value.token === "string" &&
+      value.tokenType === "Bearer" &&
+      typeof value.user?.id === "string" &&
+      typeof value.user?.name === "string" &&
+      typeof value.user?.email === "string" &&
+      ["ORGANIZER", "CUSTOMER", "GATE"].includes(value.user?.role),
+  );
 }

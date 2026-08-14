@@ -52,8 +52,8 @@ export function SiteHeader({
           <div className={styles.gateContext}>
             <ShieldCheck aria-hidden="true" size={20} />
             <span>
-              <strong>Operacao de portaria</strong>
-              Validacao protegida e auditavel
+              <strong>Operação de portaria</strong>
+              Validação protegida e auditável
             </span>
           </div>
         ) : (
@@ -80,7 +80,7 @@ export function SiteHeader({
             </button>
           </form>
         )}
-        <nav className={styles.nav} aria-label="Navegacao principal">
+        <nav className={styles.nav} aria-label="Navegação principal">
           <Link className={styles.eventsLink} href="/eventos">
             <CalendarDays aria-hidden="true" size={19} />
             Eventos
@@ -133,6 +133,7 @@ export function SiteHeader({
                 <span className={styles.sessionName}>{session.user.name}</span>
               </Link>
               <button
+                aria-label="Sair da conta"
                 className={styles.logoutButton}
                 onClick={onLogout}
                 type="button"

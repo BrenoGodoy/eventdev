@@ -67,7 +67,7 @@ function EventsCatalogContent({
           return;
         }
 
-        setError("Nao foi possivel carregar o catalogo agora.");
+        setError("Não foi possível carregar o catálogo agora.");
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -148,7 +148,7 @@ function EventsCatalogContent({
             />
           </label>
           <label className={styles.field}>
-            <span>Preco maximo</span>
+            <span>Preço maximo</span>
             <div className={styles.priceInput}>
               <span>R$</span>
               <input
@@ -170,7 +170,7 @@ function EventsCatalogContent({
 
         <div className={styles.resultsHeading}>
           <div>
-            <p className={styles.eyebrow}>Catalogo EventDev</p>
+            <p className={styles.eyebrow}>Catálogo EventDev</p>
             <h1 id="events-title">
               {hasFilters ? "Eventos encontrados" : "Todos os eventos"}
             </h1>
@@ -196,13 +196,13 @@ function EventsCatalogContent({
           </div>
         ) : error ? (
           <div className={styles.status} role="alert">
-            <strong>Catalogo indisponivel</strong>
+            <strong>Catálogo indisponível</strong>
             <p>{error}</p>
           </div>
         ) : events.length === 0 ? (
           <div className={styles.status}>
             <strong>Nenhum evento encontrado</strong>
-            <p>Tente ampliar o local, a data ou o limite de preco.</p>
+            <p>Tente ampliar o local, a data ou o limite de preço.</p>
             <button onClick={clearFilters} type="button">
               Ver todos os eventos
             </button>
