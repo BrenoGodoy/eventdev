@@ -75,17 +75,35 @@
   object-fit: cover;
 }
 
-.activeBadge {
+.statusBadge {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
   border-radius: var(--radius-sm);
-  background: var(--color-acid);
-  color: var(--color-ink);
   padding: 0.45rem 0.6rem;
   font-size: 0.68rem;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.statusActive {
+  background: var(--color-acid);
+  color: var(--color-ink);
+}
+
+.statusUsed {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.statusCanceled {
+  background: var(--color-danger);
+  color: var(--color-surface);
+}
+
+.statusTransferred {
+  background: var(--color-violet);
+  color: var(--color-surface);
 }
 
 .ticketDetails {
@@ -135,6 +153,35 @@
 .publicCode strong {
   font-family: var(--font-display);
   letter-spacing: 0;
+}
+
+.usedNotice {
+  display: flex;
+  width: fit-content;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+  border-left: 3px solid var(--color-ink);
+  background: #f0f1f5;
+  color: var(--color-text-muted);
+  padding: 0.7rem 0.8rem;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.usedNotice > svg {
+  flex: 0 0 auto;
+  color: var(--color-ink);
+}
+
+.usedNotice span {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.usedNotice strong {
+  color: var(--color-ink);
+  font-size: 0.78rem;
 }
 
 .shareArea {
@@ -283,6 +330,19 @@
   font-size: 0.72rem;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.usedQrArea {
+  background: #f3f4f7;
+}
+
+.usedQrArea > svg {
+  filter: grayscale(1);
+  opacity: 0.26;
+}
+
+.qrArea .usedQrLabel {
+  color: var(--color-text-muted);
 }
 
 .loading,

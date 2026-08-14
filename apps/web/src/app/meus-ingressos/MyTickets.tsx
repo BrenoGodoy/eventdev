@@ -28,6 +28,25 @@ import { formatEventDate, formatEventTime } from "../../lib/events";
 import { useAuthSession } from "../../lib/use-auth-session";
 import styles from "./page.module.css";
 
+const ticketStatusLabels: Record<EventTicket["status"], string> = {
+  ACTIVE: "Ativo",
+  USED: "Já utilizado",
+  CANCELED: "Cancelado",
+  TRANSFERRED: "Transferido",
+};
+
+const ticketStatusStyles: Record<EventTicket["status"], string> = {
+  ACTIVE: styles.statusActive,
+  USED: styles.statusUsed,
+  CANCELED: styles.statusCanceled,
+  TRANSFERRED: styles.statusTransferred,
+};
+
+const usedAtFormatter = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
 export function MyTickets() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -156,7 +175,7 @@ export function MyTickets() {
           <div>
             <p className={styles.eyebrow}>Carteira EventDev</p>
             <h1 id="tickets-title">Meus ingressos</h1>
-            <p>Ingressos ativos de {session.user.name}.</p>
+            <p>Ingressos de {session.user.name}.</p>
           </div>
           <Link
             className={`${actions.action} ${actions.secondary}`}
@@ -206,7 +225,11 @@ export function MyTickets() {
                     sizes="(max-width: 680px) 100vw, 360px"
                     src={ticket.event.imageUrl}
                   />
-                  <span className={styles.activeBadge}>Ativo</span>
+                  <span
+                    className={`${styles.statusBadge} ${ticketStatusStyles[ticket.status]}`}
+                  >
+                    {ticketStatusLabels[ticket.status]}
+                  </span>
                 </div>
                 <div className={styles.ticketDetails}>
                   <p className={styles.eyebrow}>
@@ -225,6 +248,18 @@ export function MyTickets() {
                     <span>Codigo do ingresso</span>
                     <strong>{ticket.publicCode}</strong>
                   </div>
+
+                  {ticket.status === "USED" ? (
+                    <div className={styles.usedNotice} role="status">
+                      <CheckCircle2 aria-hidden="true" size={18} />
+                      <span>
+                        <strong>Ingresso já utilizado</strong>
+                        {ticket.usedAt
+                          ? `Entrada registrada em ${usedAtFormatter.format(new Date(ticket.usedAt))}.`
+                          : "A entrada deste ingresso já foi registrada."}
+                      </span>
+                    </div>
+                  ) : null}
 
                   {ticket.status === "ACTIVE" && !ticket.usedAt ? (
                     <div className={styles.shareArea}>
@@ -291,7 +326,11 @@ export function MyTickets() {
                     </div>
                   ) : null}
                 </div>
-                <div className={styles.qrArea}>
+                <div
+                  className={`${styles.qrArea} ${
+                    ticket.status === "USED" ? styles.usedQrArea : ""
+                  }`}
+                >
                   <QRCodeSVG
                     bgColor="#ffffff"
                     fgColor="#0b1020"
@@ -301,9 +340,13 @@ export function MyTickets() {
                     title={`QR do ingresso ${ticket.publicCode}`}
                     value={ticket.qrPayload}
                   />
-                  <p>
-                    <ShieldCheck aria-hidden="true" size={16} />
-                    QR assinado
+                  <p className={ticket.status === "USED" ? styles.usedQrLabel : ""}>
+                    {ticket.status === "USED" ? (
+                      <CheckCircle2 aria-hidden="true" size={16} />
+                    ) : (
+                      <ShieldCheck aria-hidden="true" size={16} />
+                    )}
+                    {ticket.status === "USED" ? "Já utilizado" : "QR assinado"}
                   </p>
                 </div>
               </article>
